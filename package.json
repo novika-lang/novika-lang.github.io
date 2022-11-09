@@ -1,0 +1,24 @@
+{
+  "name": "novika-gh-pages",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@11ty/eleventy": "^1.0.2",
+    "@11ty/eleventy-plugin-syntaxhighlight": "^4.2.0",
+    "@textlint/markdown-to-ast": "^12.2.2",
+    "markdown-it-prism": "^2.3.0",
+    "mdast-util-from-markdown": "^1.2.0",
+    "nodemon": "^2.0.20",
+    "ranges-apply": "^6.2.12",
+    "regexp-match-indices": "^1.0.2",
+    "uid-safe": "^2.1.5",
+    "wordpos": "^2.1.0"
+  }
+}

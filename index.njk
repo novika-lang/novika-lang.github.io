@@ -1,0 +1,26 @@
+---
+title: Home
+layout: default
+---
+
+<section class="banner">
+  <div class="banner-content">
+    <h1 class="banner-text">
+      Novika is a <b>moldable</b>, <b>concise</b>, and <b>expressive</b>
+      programming language in the spirit of Forth, Self, Red/Rebol, and Lisp.
+    </h1>
+
+    <div class="banner-sample">
+      <div class="banner-sample-content">
+        {% highlight "novika" %}
+1 to: 100 each: [
+  [ [ 15 /? ] 'FizzBuzz'
+    [  5 /? ] 'Buzz'
+    [  3 /? ] 'Fizz'
+  ] choose echo
+]
+        {% endhighlight %}
+      </div>
+    </div>
+  </div>
+</section>

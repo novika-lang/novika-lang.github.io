@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }} — Novika Programming Language</title>
+    <link rel="stylesheet" href={{'/css/main.css' | url}} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono&family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/x-icon" href="/res/favicon.ico">
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <a href="/">
+          <img src="/res/logo.svg" alt="logo" />
+        </a>
+        <nav>
+          <a href="/guide">Guide</a>
+          <a href="/words">Words</a>
+          <a href="/api">API</a>
+          <a
+            class="primary"
+            href="https://github.com/novika-lang/novika/releases/latest"
+            >Download</a
+          >
+        </nav>
+      </header>
+      <main>
+        {{ content | safe }}
+      </main>
+    </div>
+    <script>
+      const wordTokens = document.querySelectorAll('.token.word');
+      wordTokens.forEach(token =>{
+        token.addEventListener("click", function() {
+          // Go to the corresponding word page. If already in words,
+          // just go to the id.
+          if (window.location.pathname == '/words/') {
+            window.history.pushState({},{}, `#${token.innerText}`);
+
+            document.getElementById(token.innerText).scrollIntoView({behavior: 'smooth'}, true);
+          } else
+            window.location.href = `{{'/words#${encodeURIComponent(token.innerText)}' | url}}`;
+        });
+      });
+    </script>
+  </body>
+</html>

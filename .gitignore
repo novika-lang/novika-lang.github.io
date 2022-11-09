@@ -1,0 +1,4 @@
+redoc.fish
+redoc.*.fish
+node_modules
+pnpm-lock.yaml

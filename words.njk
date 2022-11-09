@@ -1,0 +1,56 @@
+---
+title: Words
+layout: default
+---
+
+<section class="word-docs">
+  {% for word in preprocess %}
+    {% set name = word.name %}
+
+    <div class="word-doc" id="{{name}}">
+      <a class="word-doc-head" href="#{{name}}">
+        {{name}}
+        <span class="doc-head-effect">{{word.effectHTML | safe}}</span>
+      </a>
+      <div class="word-doc-desc">
+        {% markdown %}{{word.textMarkdown | safe}}{% endmarkdown %}
+      </div>
+    </div>
+  {% endfor %}
+</section>
+
+<script>
+  window.onload = () => {
+    const docHeads = document.querySelectorAll(".word-doc-head");
+    const docEffectIds = document.querySelectorAll(".doc-eff-id");
+    const wordInlineRefs = document.querySelectorAll(".inline-word-ref");
+
+    for(const inlineRef of wordInlineRefs) {
+      inlineRef.onclick = () => {
+        window.history.pushState({},{}, `#${inlineRef.innerText}`);
+        document.getElementById(inlineRef.innerText).scrollIntoView({behavior: 'smooth'}, true);
+      };
+    }
+
+    for(const docHead of docHeads) {
+      docHead.onmousemove = (e) => {
+        const deg = 360 * (+e.pageX) / docHead.clientWidth;
+        const bg = `linear-gradient(${deg}deg, #4472B0,#6559F4)`;
+        docHead.style.borderImageSource = bg;
+      }
+      docHead.onmouseleave = () =>{
+        docHead.style.borderImageSource = "none";
+        docHead.style.borderColor = "var(--color-fg-sunken)";
+      }
+    }
+
+    for (const docEffectId of docEffectIds) {
+      const scope = docEffectId.getAttribute("data-scope");
+      const siblings = document.querySelectorAll(`[data-scope="${scope}"`);
+      docEffectId.onmouseover = () =>
+        siblings.forEach(sibling => sibling.classList.add("eff-scope-hovered"))
+      docEffectId.onmouseout = () =>
+        siblings.forEach(sibling => sibling.classList.remove("eff-scope-hovered"))
+    }
+  };
+</script>
