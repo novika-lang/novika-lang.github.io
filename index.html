@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home — Novika Programming Language</title>
+    <link rel="stylesheet" href=/css/main.css />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono&family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/x-icon" href="/res/favicon.ico">
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <a href="/">
+          <img src="/res/logo.svg" alt="logo" />
+        </a>
+        <nav>
+          <a href="/guide">Guide</a>
+          <a href="/words">Words</a>
+          <a href="/api">API</a>
+          <a
+            class="primary"
+            href="https://github.com/novika-lang/novika/releases/latest"
+            >Download</a
+          >
+        </nav>
+      </header>
+      <main>
+        
+<section class="banner">
+  <div class="banner-content">
+    <h1 class="banner-text">
+      Novika is a <b>moldable</b>, <b>concise</b>, and <b>expressive</b>
+      programming language in the spirit of Forth, Self, Red/Rebol, and Lisp.
+    </h1>
+
+    <div class="banner-sample">
+      <div class="banner-sample-content">
+        <pre class="language-novika"><code class="language-novika"><span class="token decimal">1</span> <span class="token word doc-word">to:</span> <span class="token decimal">100</span> <span class="token word doc-word">each:</span> [<br>  [ [ <span class="token decimal">15</span> <span class="token word doc-word">/?</span> ] <span class="token quote">'FizzBuzz'</span><br>    [  <span class="token decimal">5</span> <span class="token word doc-word">/?</span> ] <span class="token quote">'Buzz'</span><br>    [  <span class="token decimal">3</span> <span class="token word doc-word">/?</span> ] <span class="token quote">'Fizz'</span><br>  ] <span class="token word doc-word">choose</span> <span class="token word doc-word">echo</span><br>]</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+      </main>
+    </div>
+    <script>
+      const wordTokens = document.querySelectorAll('.token.word');
+      wordTokens.forEach(token =>{
+        token.addEventListener("click", function() {
+          // Go to the corresponding word page. If already in words,
+          // just go to the id.
+          if (window.location.pathname == '/words/') {
+            window.history.pushState({},{}, `#${token.innerText}`);
+
+            document.getElementById(token.innerText).scrollIntoView({behavior: 'smooth'}, true);
+          } else
+            window.location.href = `/words#${encodeURIComponent(token.innerText)}`;
+        });
+      });
+    </script>
+  </body>
+</html>
