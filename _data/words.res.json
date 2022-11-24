@@ -52,6 +52,14 @@
       "name": "thruLitBlock",
       "desc": "( B -- Lb ): leaves Literal block after cursor in Block. If\nform after cursor isn't a block, encloses it and opens it with\nan empty stack, Block being the enclosing block's parent, and\nfinally asserts the resulting form is a block."
     },
+    "thruWord": {
+      "name": "thruWord",
+      "desc": "( B -- W/dies ): same as `thru asWord`."
+    },
+    "thruWord:": {
+      "name": "thruWord:",
+      "desc": "( B W -- /dies ): same as `thruWord`, but also checks if\n the `thru`-ed word is the same as Word.\n\n```\n[ ahead thruVal $: begin\n  ahead thruWord: to:\n  ahead thruVal $: end\n\n  begin to: end\n] @: from:\n\nfrom: 1 to: 100 leaves: [ 1 2 3 \"…\" 98 99 100 ]\n```\n\n"
+    },
     "thruVal": {
       "name": "thruVal",
       "desc": "( B -- F' ): same as `thruBlock val`."
@@ -142,23 +150,35 @@
     },
     "2asc": {
       "name": "2asc",
-      "desc": "( A B -- Min Max ): sorts two decimals, A and B, in asceiding\n(min to max) order. In case A = B, order is unchanged."
+      "desc": "( A B -- Min Max ): sorts two decimals, A and B, in\n ascending (min to max) order. In case A = B, order is\n unchanged.\n\n```\n1 2 2asc leaves: [ 1 2 ]\n2 1 2asc leaves: [ 1 2 ]\n```\n\n"
     },
     "2desc": {
       "name": "2desc",
-      "desc": "( A B -- Max Min ): sorts two decimals, A and B, in descending\n(max to min) order. In case A = B, order is unchanged."
+      "desc": "( A B -- Max Min ): sorts two decimals, A and B, in\n descending (max to min) order. In case A = B, order is\n unchanged.\n\n```\n1 2 2desc leaves: [ 2 1 ]\n2 1 2desc leaves: [ 2 1 ]\n```\n\n"
     },
     "2min": {
       "name": "2min",
-      "desc": "( A B -- M ): leaves Minimum of two decimals, A and B."
+      "desc": "( A B -- M ): leaves Minimum of two decimals, A and B.\n\n```\n3 10 2min leaves: 3\n```\n\n"
     },
     "2max": {
       "name": "2max",
-      "desc": "( A B -- M ): leaves Maximum of two decimals, A and B."
+      "desc": "( A B -- M ): leaves Maximum of two decimals, A and B.\n\n```\n3 10 2max leaves: 10\n```\n\n"
     },
     "randFromTo": {
       "name": "randFromTo",
-      "desc": "( Min Max -- N ): generates random Number between min/max."
+      "desc": "( L H -- N ): generates random Number between Low and\nHigh, *including* both Low and High."
+    },
+    "clamp:": {
+      "name": "clamp:",
+      "desc": "( N clamp: L H -- N/L/H ): clamps Number between Low and\n High: if Number is less than Low, leaves low; if Number\n is greater than High, leaves High.\n\n```\n1 clamp: 5 10 leaves: 5\n5 clamp: 5 10 leaves: 5\n7 clamp: 5 10 leaves: 7\n10 clamp: 5 10 leaves: 10\n100 clamp: 5 10 leaves: 10\n```\n\n"
+    },
+    "flipSign": {
+      "name": "flipSign",
+      "desc": "( N -- -N ): flips the sign of N.\n\n```\n-1 flipSign leaves: 1\n0 flipSign leaves: 0\n1 flipSign leaves: -1\n```\n\n"
+    },
+    "abs": {
+      "name": "abs",
+      "desc": "( N -- Av ): leaves the Absolute value of N.\n\n```\n0 abs leaves: 0\n100 abs leaves: 100\n-100 abs leaves: 100\n```\n\n"
     },
     "echo": {
       "name": "echo",
@@ -311,6 +331,14 @@
     "last": {
       "name": "last",
       "desc": "( B -- F ): leaves last Form in Block. Dies if Block\n is empty.\n\n```\n[ 0 ] last leaves: 0\n[ 1 2 3 ] last leaves: 3\n```\n\n"
+    },
+    "startsWith?": {
+      "name": "startsWith?",
+      "desc": "( B/Q F/Fq -- Sb ): leaves Status boolean for whether\n Block ends with Form (as per `=`), or Quote ends with\n Fragment quote.\n\nAlways leaves true if Form or Fragment quote is empty.\n\n```\n'hello world' 'h' startsWith? leaves: true\n'hello world' 'hello' startsWith? leaves: true\n'hello world' 'world' startsWith? leaves: false\n\n[ 1 2 3 ] 1 startsWith? leaves: true\n[ 1 2 3 ] 3 startsWith? leaves: false\n```\n\n"
+    },
+    "endsWith?": {
+      "name": "endsWith?",
+      "desc": "( B/Q F/Fq -- Sb ): leaves Status boolean for\n whether Block ends with Form (as per `=`), or if Quote\n ends with Fragment quote.\n\nAlways leaves true if Form or Fragment quote is empty.\n\n```\n'hello world' 'd' endsWith? leaves: true\n'hello world' 'world' endsWith? leaves: true\n'hello world' 'hello' endsWith? leaves: false\n\n[ 1 2 3 ] 3 endsWith? leaves: true\n[ 1 2 3 ] 1 endsWith? leaves: false\n```\n\n"
     },
     "child": {
       "name": "child",
@@ -508,6 +536,10 @@
       "name": "to:",
       "desc": "( B to: E -- Rb ): infix version of `range`.\n\n```\n\"Note: `...` means there's more. These 'leaves:'\n expressions won't run right away.\"\n\n1 to: 100 leaves: [ 1 2 3 \"...\" 98 99 100 ]\n10 to: 0 leaves: [ 10 9 8 \"...\" 0 ]\n```\n\n"
     },
+    "from:": {
+      "name": "from:",
+      "desc": "a block"
+    },
     "join": {
       "name": "join",
       "desc": "( Fl -- Q ): stitches enquoted forms from Form list and\n leaves the resulting Quote.\n\n```\n[ 'A' 'B' 'C' ] join leaves: 'ABC'\n\n1 $: x\n2 $: y\n[ x '; ' y ] here join leaves: '1; 2'\n```\n\n"
@@ -599,6 +631,34 @@
     "tally:": {
       "name": "tally:",
       "desc": "( L tally: B -- ): infix version of `tally`."
+    },
+    "sortUsing!:": {
+      "name": "sortUsing!:",
+      "desc": "( B sortUsing!: Cb -- B ): infix version of `sortUsing!`.\n\n```\n[ 3 1 2 4 0 -3 ] sortUsing!: - leaves: [ [ -3 0 1 2 3 4 ] ]\n```\n\n"
+    },
+    "sort!": {
+      "name": "sort!",
+      "desc": "( Dlb -- Dlb ): inplace sort of Decimal list block.\n Chokes on non-decimal forms.\n\n```\n[ 3 1 2 4 0 -3 ] sort! leaves: [ [ -3 0 1 2 3 4 ] ]\n```\n\n"
+    },
+    "sortBy!": {
+      "name": "sortBy!",
+      "desc": "( B Mb -- B ): inplace sort for Block using the\n Mapper block, which must be able to map *all* forms\n in Block to a decimal.\n\n```\n[ 'hi' 'worldish' 'hi' 'foobar' ] [ count ] sortBy! leaves: [ [ 'hi' 'hi' 'foobar' 'worldish' ] ]\n```\n\n"
+    },
+    "sortBy!:": {
+      "name": "sortBy!:",
+      "desc": "( B sortBy!: Mb -- B ): infix version of `sortBy!`.\n\n```\n[ 'hi' 'worldish' 'hi' 'foobar' ] sortBy!: count leaves: [ [ 'hi' 'hi' 'foobar' 'worldish' ] ]\n```\n\n"
+    },
+    "|around": {
+      "name": "|around",
+      "desc": "( L N -- Fab ): leaves a Forms around block with N/2 forms\n before the cursor, and N/2 forms after the cursor in List.\n\nForms around block may consist of less than N forms, but only\nwhen there are less than N forms in List (in this case, Forms\naround block is essentially a shallow copy of List).\n\nForms around block is an orphan with two dictionary entries:\n`start`, which stores the index of the first item in List,\nand `end`, which stores the index of the last item in List.\n\nDies when N is zero or when List is empty, because in these\ncases it is impossible to find the pivot form.\n\n```\n[ 1 2 3 4 ] $: block\nblock 2 |to\nblock echo \"STDOUT: [ 1 2 | 3 4 ]⏎ \"\nblock 2 |around echo \"STDOUT: [ 2 3 · ${start :: 1} ${end :: 3} ]⏎ \"\n```\n\n"
+    },
+    "console:width": {
+      "name": "console:width",
+      "desc": "( -- Cw ): leaves Console width (in columns)."
+    },
+    "console:height": {
+      "name": "console:height",
+      "desc": "( -- Ch ): leaves Console height (in rows)."
     },
     "<=": {
       "name": "<=",
@@ -700,13 +760,37 @@
       "name": "disk:hasSymlink?",
       "desc": "( Pq -- true/false ): leaves whether Path quote exists\n and points to a symlink."
     },
+    "disk:dirEmpty?": {
+      "name": "disk:dirEmpty?",
+      "desc": "( Ptd -- B ): leaves Boolean for whether Path to directory\n is empty. Dies if Path to directory points to something\n other than a directory, or doesn't exist."
+    },
+    "disk:join": {
+      "name": "disk:join",
+      "desc": "( Bp Cp -- P ): leaves Path, which is the result of joining Base\n path and Child path using the platform-specific path separator.\n\n```\n'hello' 'world' disk:join leaves: 'hello/world' \"On Unix\"\n'hello' 'world' disk:join leaves: 'hello\\world' \"On Windows\"\n```"
+    },
+    "disk:pwd": {
+      "name": "disk:pwd",
+      "desc": "( -- Wd ): leaves current Working directory."
+    },
     "disk:touch": {
       "name": "disk:touch",
       "desc": "( P -- ): creates an empty file at Path. Does nothing\n if Path already exists."
     },
+    "disk:mkdir": {
+      "name": "disk:mkdir",
+      "desc": "( P -- ): creates an empty directory at Path, including\n any non-existing intermediate directories. Does nothing\n if Path already exists."
+    },
+    "disk:copy": {
+      "name": "disk:copy",
+      "desc": "( S D -- ): copies Source (quote path to a file, symlink,\n or directory) to Destination (also a quote).\n\nIf Source is a directory, copies it recursively.\nIf copy process failed, dies."
+    },
     "disk:read": {
       "name": "disk:read",
       "desc": "( F -- C ): reads and leaves the Contents of File. Dies\n if there is no File."
+    },
+    "disk:write": {
+      "name": "disk:write",
+      "desc": "( Cq Fp -- ): (over)writes content of file at File path\n with Content quote. Dies if File path doesn't exist or\n doesn't point to a file."
     },
     "novika:version": {
       "name": "novika:version",
@@ -763,6 +847,10 @@
     "nap": {
       "name": "nap",
       "desc": "( D -- ): sleeps a Duration of time, given in *milliseconds*."
+    },
+    "bye": {
+      "name": "bye",
+      "desc": "( Ec -- ): ends the program with the given decimal Exit code."
     },
     "rgb": {
       "name": "rgb",
@@ -1140,6 +1228,10 @@
       "name": "mergeDicts",
       "desc": "( Rb Db -- ): copies entries from Donor block's dictionary\n to Recipient block's dictionary. Donor entries override\n same-named entries in Recipient. Donor entries starting\n with one or more underscores are not imported.\n\n```\n[ ] $: a\na #x 100 pushes\na #_private 'Fool!' pushes\n[ ] $: b\nb #y 200 pushes\n\na b 2echo\n\"STDOUT: [ · ${x :: 100} ${_private :: 'Fool!'} ]⏎\"\n\"STDOUT: [ · ${y :: 200} ]⏎\"\n\nb a mergeDicts\nb echo\n\"STDOUT: [ · ${y :: 200} ${x :: 100} ]⏎\"\n```"
     },
+    "sortUsing!": {
+      "name": "sortUsing!",
+      "desc": "( B Cb -- B ): leaves Block sorted inplace. Forms in Block\n are compared using Comparator block.\n\nComparator block is opened with two forms on the stack; let's\ncall them A and B. If Comparator block leaves a negative decimal\n(conventionally `-1`), then `A < B`. If Comparator block leaves\n`0`, then `A = B`. If Comparator block leaves a positive decimal\n(conventionally `1`), then `A > B`.\n\nDies if Comparator block leaves any other (kind of) form.\n\nIgnores all forms but the topmost for Comparator block.\n\n\n```\n[ 3 2 1 ] [ - ] sortUsing leaves: [ 1 2 3 ]\n```"
+    },
     "getErrorDetails": {
       "name": "getErrorDetails",
       "desc": "( Eo -- Dq ): leaves Details quote containing error details\n of an Error object."
@@ -1210,11 +1302,11 @@
     },
     "console:on": {
       "name": "console:on",
-      "desc": "( -- ): enables the Console API."
+      "desc": "( -- ): enables the console. Must be called before using\n any other console-related word."
     },
     "console:off": {
       "name": "console:off",
-      "desc": "( -- ): disables the Console API."
+      "desc": "( -- ): disables the console. Must be called at the end\n of your program or when you don't need console anymore."
     },
     "console:compat": {
       "name": "console:compat",
@@ -1228,49 +1320,105 @@
       "name": "console:truecolor",
       "desc": "( -- ): enables the truecolor output mode. In this mode,\nall colors are available and are passed to the console\nas-is."
     },
-    "console:setPrimary": {
-      "name": "console:setPrimary",
-      "desc": "( Fc Bc -- ): set the primary Foreground and Background colors.\n Before you `console:clear`, only `console:print` will respect\n these colors. But after you `console:clear`, the whole console\n will be cleared with these colors."
-    },
-    "console:width": {
-      "name": "console:width",
-      "desc": "( -- Cw ): leaves Console width (in columns)"
-    },
-    "console:height": {
-      "name": "console:height",
-      "desc": "( -- Ch ): leaves Console height (in rows)"
+    "console:size": {
+      "name": "console:size",
+      "desc": "( -- Cw Ch ): leaves the Console width (in columns) and\n Console height (in rows)."
     },
     "console:setTimeout": {
       "name": "console:setTimeout",
-      "desc": "( D -- ): sets input timeout to Duration, given in *milliseconds*.\n\n * If Duration is negative, `console:peek` will wait for\n   input indefinitely (i.e., until there is input).\n\n * If Duration is zero, `console:peek` won't wait for input\n   at all, but make note if there is any at the moment.\n\n * If Duration is positive, `console:peek` will peek during\n   the timeout window."
+      "desc": "( D -- ): sets input timeout to Duration, given in *milliseconds*.\n\n * If Duration is negative, `console:readKey` will wait\n   for input indefinitely (i.e., until there is input).\n\n * If Duration is zero, `console:readKey` won't wait for\n   input at all, but make note if there is any at the moment.\n\n * If Duration is positive, `console:readKey` will peek\n   during the timeout window."
     },
-    "console:peek": {
-      "name": "console:peek",
-      "desc": "( -- ): peeks or waits for input. See `console:setTimeout`. Refreshes\n the input state. Use `console:hadKeyPressed` and friends to explore\n the input state afterwards."
+    "console:readKey": {
+      "name": "console:readKey",
+      "desc": "( -- ): peeks or waits for input. See `console:setTimeout`.\n Refreshes the input state. Use `console:hadKeyPressed` and\n friends to explore the input state afterwards."
     },
-    "console:hadKeyPressed": {
-      "name": "console:hadKeyPressed",
-      "desc": "( -- B ): leaves Boolean for whether there was a key press\n event registered. To get the name of the key that was pressed,\n use `console:getKeyPressed`, *but only after making sure\n that Boolean is true*."
+    "console:hadKeyPressed?": {
+      "name": "console:hadKeyPressed?",
+      "desc": "( -- B ): leaves Boolean for whether any key was pressed."
     },
-    "console:getKeyPressed": {
-      "name": "console:getKeyPressed",
-      "desc": "( -- Kq ): leaves most recent key pressed, as Key quote. Dies if\n none. You can use `console:hadKeyPressed` to check whether there\n was a key pressed before using this word."
+    "console:hadCtrlPressed?": {
+      "name": "console:hadCtrlPressed?",
+      "desc": "( -- B ): leaves Boolean for whether the CTRL key was pressed."
     },
-    "console:isKeyChar": {
-      "name": "console:isKeyChar",
-      "desc": "( Kq -- B ): leaves Boolean for whether Key quote is\n considered a single-character key."
+    "console:hadAltPressed?": {
+      "name": "console:hadAltPressed?",
+      "desc": "( -- B ): leaves Boolean for whether the ALT key was pressed."
     },
-    "console:print": {
-      "name": "console:print",
-      "desc": "( Q X Y -- ): prints Quote using the foreground, background\n colors set by `console:setPrimary`, at an X and Y position\n (in columns and rows correspondingly)."
+    "console:hadShiftPressed?": {
+      "name": "console:hadShiftPressed?",
+      "desc": "( -- B ): leaves Boolean for whether the SHIFT key was pressed."
+    },
+    "console:hadBackspacePressed?": {
+      "name": "console:hadBackspacePressed?",
+      "desc": "( -- B ): leaves Boolean for whether the Backspace key\n was pressed."
+    },
+    "console:hadFnPressed?": {
+      "name": "console:hadFnPressed?",
+      "desc": "( -- B ): leaves Boolean for whether one of the function\n keys F1-F12 was pressed."
+    },
+    "console:hadInsertPressed?": {
+      "name": "console:hadInsertPressed?",
+      "desc": "( -- B ): leaves Boolean for whether the INSERT key was pressed."
+    },
+    "console:hadDeletePressed?": {
+      "name": "console:hadDeletePressed?",
+      "desc": "( -- B ): leaves Boolean for whether the DELETE key was pressed."
+    },
+    "console:hadHomePressed?": {
+      "name": "console:hadHomePressed?",
+      "desc": "( -- B ): leaves Boolean for whether the HOME key was pressed."
+    },
+    "console:hadEndPressed?": {
+      "name": "console:hadEndPressed?",
+      "desc": "( -- B ): leaves Boolean for whether the END key was pressed."
+    },
+    "console:hadPageUpPressed?": {
+      "name": "console:hadPageUpPressed?",
+      "desc": "( -- B ): leaves Boolean for whether the PAGE UP key was pressed."
+    },
+    "console:hadPageDownPressed?": {
+      "name": "console:hadPageDownPressed?",
+      "desc": "( -- B ): leaves Boolean for whether the PAGE DOWN key was pressed."
+    },
+    "console:hadLeftPressed?": {
+      "name": "console:hadLeftPressed?",
+      "desc": "( -- B ): leaves Boolean for whether the LEFT ARROW key\n was pressed."
+    },
+    "console:hadRightPressed?": {
+      "name": "console:hadRightPressed?",
+      "desc": "( -- B ): leaves Boolean for whether the RIGHT ARROW key\n was pressed."
+    },
+    "console:hadUpPressed?": {
+      "name": "console:hadUpPressed?",
+      "desc": "( -- B ): leaves Boolean for whether the UP ARROW key\n was pressed."
+    },
+    "console:hadDownPressed?": {
+      "name": "console:hadDownPressed?",
+      "desc": "( -- B ): leaves Boolean for whether the DOWN ARROW key\n was pressed."
+    },
+    "console:getCharPressed": {
+      "name": "console:getCharPressed",
+      "desc": "( -- Cq ): leaves Char quote for the key that was pressed.\n Usually a lowercase or uppercase letter; but also may look\n like `'\n'` or `'\t'`, etc.)\n\nIn case the key that was pressed cannot be represented\nby the means of a quote, or if the user did not press\nany key, an empty quote is left in place of Char quote."
+    },
+    "console:change": {
+      "name": "console:change",
+      "desc": "( X Y -- ): changes the color of the cell at X, Y coordinates\n to be the foreground, background colors set by ink's\n `withEchoFg` and `withEchoBg`."
+    },
+    "console:appendEcho": {
+      "name": "console:appendEcho",
+      "desc": "( F X Y -- ): appends echo of Form at an X and Y position\n (in columns and rows correspondingly) using the foreground,\n background colors set by ink's `withEchoFg` and `withEchoBg`."
+    },
+    "console:withReverseAppendEcho": {
+      "name": "console:withReverseAppendEcho",
+      "desc": "( F X Y -- ): appends Form with foreground and background\n colors swapped with each other (background color is set\n to foreground color, and vice versa)."
     },
     "console:present": {
       "name": "console:present",
-      "desc": "( -- ): syncs internal buffer and console"
+      "desc": "( -- ): syncs internal buffer and console."
     },
     "console:clear": {
       "name": "console:clear",
-      "desc": "( -- ): clears console with primary colors"
+      "desc": "( -- ): clears console with primary colors."
     }
   }
 }
