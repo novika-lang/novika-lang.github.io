@@ -148,6 +148,26 @@
       "name": "times:",
       "desc": "( C times: B -- ): infix version of `times`."
     },
+    "PI": {
+      "name": "PI",
+      "desc": "decimal number 3.14159265358979323846"
+    },
+    "TAU": {
+      "name": "TAU",
+      "desc": "decimal number 6.283185307179586476925"
+    },
+    "PI/180": {
+      "name": "PI/180",
+      "desc": "decimal number 0.017453292519943295769222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "180/PI": {
+      "name": "180/PI",
+      "desc": "decimal number 57.2957795130823208768463643441910977570529919254828590874086289568418546076208025168496771016363559802"
+    },
+    "EPSILON": {
+      "name": "EPSILON",
+      "desc": "decimal number 0.001"
+    },
     "2asc": {
       "name": "2asc",
       "desc": "( A B -- Min Max ): sorts two decimals, A and B, in\n ascending (min to max) order. In case A = B, order is\n unchanged.\n\n```\n1 2 2asc leaves: [ 1 2 ]\n2 1 2asc leaves: [ 1 2 ]\n```\n\n"
@@ -179,6 +199,46 @@
     "abs": {
       "name": "abs",
       "desc": "( N -- Av ): leaves the Absolute value of N.\n\n```\n0 abs leaves: 0\n100 abs leaves: 100\n-100 abs leaves: 100\n```\n\n"
+    },
+    "%": {
+      "name": "%",
+      "desc": "( D -- R ): leaves Reciprocal of Decimal (`1/D`). Leaves\n 0 if Decimal is 0. Note: as in `12 % 12 *`, this may not\n always leave `1` because of math imprecisions.\n\n```\n0 % leaves: 0\n20 % leaves: 0.05\n100 % 100 * leaves: 1\n```\n\n"
+    },
+    "rangesMap": {
+      "name": "rangesMap",
+      "desc": "( D R1b R1e R2b R2e -- D' ): leaves Decimal in range\n [R1b; R1e] mapped to the range [R2b; R2e].\n\nNote: Decimal is clamped into the range [R1b; R1e].\nNote: implementation taken from https://www.arduino.cc/reference/en/language/functions/math/map/\n\n```\n100  0 100  1.5 255  rangesMap leaves: 255\n  0  0 100  1.5 255  rangesMap leaves: 1.5\n\n\"Reverse range:\"\n\n10  0 100  100 0  rangesMap leaves: 90\n```\n\n"
+    },
+    "mapFromRange:": {
+      "name": "mapFromRange:",
+      "desc": "( D mapFromRange: R1b R1e toRange: R2b R2e -- D' ): infix\n version of `rangesMap`.\n\n```\n100 mapFromRange: 0 100 toRange: 1.5 255 leaves: [ 255 ]\n  0 mapFromRange: 0 100 toRange: 1.5 255 leaves: [ 1.5 ]\n```\n\n"
+    },
+    "mapToRange": {
+      "name": "mapToRange",
+      "desc": "( P Rb Re -- D ): leaves Decimal in range [Range begin; Range end]\n corresponding to the given Percentage (in [0; 1]).\n\nSee `rangesMap` for more details.\n\n```\n\"...etc..\"\n-100  0 100  mapToRange leaves: 0\n   0  0 100  mapToRange leaves: 0\n 0.1  0 100  mapToRange leaves: 10\n   1  0 100  mapToRange leaves: 100\n   2  0 100  mapToRange leaves: 100\n\"...etc..\"\n```\n\n"
+    },
+    "mapToRange:": {
+      "name": "mapToRange:",
+      "desc": "( P mapToRange: Rb Re -- D ): infix version of `mapToRange`."
+    },
+    "%->:": {
+      "name": "%->:",
+      "desc": "( Hp %->: Rb Re -- D ): leaves Decimal, which is Human\n percentage (0-100) mapped to [Range begin; Range end]\n range. Human percentage is clamped to 0-100.\n\n```\n\"What is 30% of John's salary, $10 000? \"\n30 %->: 0   10_000  leaves: 3000\n60 %->: 64  255     leaves: 178.6\n```\n\n"
+    },
+    "->%:": {
+      "name": "->%:",
+      "desc": "( D ->%: Rb Re -- Hp ): leaves Human percentage for\n Decimal in the given range [Range begin; Range end].\n Inverse of `%->:`.\n\n```\n100 ->%: 0 256 leaves: 39.0625\n\n\"Can be checked like so:\"\n39.0625 %->: 0 256 leaves: 100\n```\n\n"
+    },
+    "deg->rad": {
+      "name": "deg->rad",
+      "desc": "( Aid -- Air ): leaves Angle in radians for the given\nAngle in degrees."
+    },
+    "rad->deg": {
+      "name": "rad->deg",
+      "desc": "( Air -- Aid ): leaves Angle in degrees for the given\nAngle in radians."
+    },
+    "approx=": {
+      "name": "approx=",
+      "desc": "( A B -- B ): leaves Boolean for whether A and B are\napproximately equal (their difference is less than or\nequal to `EPSILON`)."
     },
     "echo": {
       "name": "echo",
@@ -216,6 +276,10 @@
       "name": "over",
       "desc": "( A B -- A B A ): duplicates a form over the top.\n\n```\n1 2 over leaves: [ 1 2 1 ]\n```\n\n"
     },
+    "tuck": {
+      "name": "tuck",
+      "desc": "( A B - B A B ): puts a duplicate of the top form\n before the second-from-top form.\n\n```\n1 2 tuck leaves: [ 2 1 2 ]\n```\n\n"
+    },
     "2dup": {
       "name": "2dup",
       "desc": "( A B -- A B A B ): duplicates a pair of forms.\n\n```\n1 2 2dup leaves: [ 1 2 1 2 ]\n```\n\n"
@@ -242,7 +306,7 @@
     },
     "keep": {
       "name": "keep",
-      "desc": "( ... T F -- ... F' T ): opens Form with\n Top on top of the stack, restoring Top after it is opened.\n\n```\n1 2 4 [ + ] keep leaves: [ 1 6 4 ]\n1 2 4 'hello' keep leaves: [ 1 2 4 'hello' 4 ]\n```\n\n"
+      "desc": "( ... T F -- ... F' T ): opens Form with Top on top\n of the stack, restoring Top after it is opened.\n\n```\n1 2 4 [ + ] keep leaves: [ 1 6 4 ]\n1 2 4 'hello' keep leaves: [ 1 2 4 'hello' 4 ]\n```\n\n"
     },
     "keep:": {
       "name": "keep:",
@@ -271,6 +335,126 @@
     "bi@:": {
       "name": "bi@:",
       "desc": "( X Y bi@: B -- Bx By ): infix version of `bi@`."
+    },
+    "easeInSine": {
+      "name": "easeInSine",
+      "desc": "( X -- Xe ): eases X using easeInSine function."
+    },
+    "easeOutSine": {
+      "name": "easeOutSine",
+      "desc": "( X -- Xe ): eases X using easeOutSine function."
+    },
+    "easeInOutSine": {
+      "name": "easeInOutSine",
+      "desc": "( X -- Xe ): eases X using easeInOutSine function."
+    },
+    "easeInCubic": {
+      "name": "easeInCubic",
+      "desc": "( X -- Xe ): eases X using easeInCubic function."
+    },
+    "easeOutCubic": {
+      "name": "easeOutCubic",
+      "desc": "( X -- Xe ): eases X using easeOutCubic function."
+    },
+    "easeInOutCubic": {
+      "name": "easeInOutCubic",
+      "desc": "( X -- Xe ): eases X using easeInOutCubic function."
+    },
+    "easeInQuint": {
+      "name": "easeInQuint",
+      "desc": "( X -- Xe ): eases X using easeInQuint function."
+    },
+    "easeOutQuint": {
+      "name": "easeOutQuint",
+      "desc": "( X -- Xe ): eases X using easeOutQuint function."
+    },
+    "easeInOutQuint": {
+      "name": "easeInOutQuint",
+      "desc": "( X -- Xe ): eases X using easeInOutQuint function."
+    },
+    "easeInCirc": {
+      "name": "easeInCirc",
+      "desc": "( X -- Xe ): eases X using easeInCirc function."
+    },
+    "easeOutCirc": {
+      "name": "easeOutCirc",
+      "desc": "( X -- Xe ): eases X using easeOutCirc function."
+    },
+    "easeInOutCirc": {
+      "name": "easeInOutCirc",
+      "desc": "( X -- Xe ): eases X using easeInOutCirc function."
+    },
+    "easeInElastic": {
+      "name": "easeInElastic",
+      "desc": "( X -- Xe ): eases X using easeInElastic function."
+    },
+    "easeOutElastic": {
+      "name": "easeOutElastic",
+      "desc": "( X -- Xe ): eases X using easeOutElastic function."
+    },
+    "easeInOutElastic": {
+      "name": "easeInOutElastic",
+      "desc": "( X -- Xe ): eases X using easeInOutElastic function."
+    },
+    "easeInQuad": {
+      "name": "easeInQuad",
+      "desc": "( X -- Xe ): eases X using easeInQuad function."
+    },
+    "easeOutQuad": {
+      "name": "easeOutQuad",
+      "desc": "( X -- Xe ): eases X using easeOutQuad function."
+    },
+    "easeInOutQuad": {
+      "name": "easeInOutQuad",
+      "desc": "( X -- Xe ): eases X using easeInOutQuad function."
+    },
+    "easeInQuart": {
+      "name": "easeInQuart",
+      "desc": "( X -- Xe ): eases X using easeInQuart function."
+    },
+    "easeOutQuart": {
+      "name": "easeOutQuart",
+      "desc": "( X -- Xe ): eases X using easeOutQuart function."
+    },
+    "easeInOutQuart": {
+      "name": "easeInOutQuart",
+      "desc": "( X -- Xe ): eases X using easeInOutQuart function."
+    },
+    "easeInExpo": {
+      "name": "easeInExpo",
+      "desc": "( X -- Xe ): eases X using easeInExpo function."
+    },
+    "easeOutExpo": {
+      "name": "easeOutExpo",
+      "desc": "( X -- Xe ): eases X using easeOutExpo function."
+    },
+    "easeInOutExpo": {
+      "name": "easeInOutExpo",
+      "desc": "( X -- Xe ): eases X using easeInOutExpo function."
+    },
+    "easeInBack": {
+      "name": "easeInBack",
+      "desc": "( X -- Xe ): eases X using easeInBack function."
+    },
+    "easeOutBack": {
+      "name": "easeOutBack",
+      "desc": "( X -- Xe ): eases X using easeOutBack function."
+    },
+    "easeInOutBack": {
+      "name": "easeInOutBack",
+      "desc": "( X -- Xe ): eases X using easeInOutBack function."
+    },
+    "easeInBounce": {
+      "name": "easeInBounce",
+      "desc": "( X -- Xe ): eases X using easeInBounce function."
+    },
+    "easeOutBounce": {
+      "name": "easeOutBounce",
+      "desc": "( X -- Xe ): eases X using easeOutBounce function."
+    },
+    "easeInOutBounce": {
+      "name": "easeInOutBounce",
+      "desc": "( X -- Xe ): eases X using easeInOutBounce function."
     },
     "toCapitalized": {
       "name": "toCapitalized",
@@ -320,17 +504,21 @@
       "name": "2enclose",
       "desc": "( X Y -- [ X Y ]B ): encloses X and Y, a pair of forms,\n in a new, orphan Block.\n\n```\n'Hello' 'World' 2enclose leaves: [ [ 'Hello' 'World' ] ]\n```\n\n"
     },
-    "fromRight": {
-      "name": "fromRight",
-      "desc": "( B I -- F ): leaves Index-th Form from right in Block.\n\n```\n[ 1 2 3 ] 0 fromRight leaves: 3\n[ 1 2 3 ] 1 fromRight leaves: 2\n[ 1 2 3 ] 2 fromRight leaves: 1\n```\n\n"
-    },
     "first": {
       "name": "first",
       "desc": "( B -- F ): leaves first Form in Block. Dies if Block\n is empty.\n\n```\n[ 0 ] first leaves: 0\n[ 1 2 3 ] first leaves: 1\n```\n\n"
     },
+    "first?": {
+      "name": "first?",
+      "desc": "( B -- F true / false ): leaves first Form in Block\n followed by true if Block is non-empty. Leaves false\n if Block is empty.\n\n```\n[ ] first? leaves: [ false ]\n[ 1 2 3 ] first? leaves: [ 1 true ]\n```\n\n"
+    },
     "last": {
       "name": "last",
       "desc": "( B -- F ): leaves last Form in Block. Dies if Block\n is empty.\n\n```\n[ 0 ] last leaves: 0\n[ 1 2 3 ] last leaves: 3\n```\n\n"
+    },
+    "last?": {
+      "name": "last?",
+      "desc": "( B -- F true / false ): leaves last Form in Block\n followed by true if Block is non-empty. Leaves false\n if Block is empty.\n\n```\n[ ] last? leaves: [ false ]\n[ 1 2 3 ] last? leaves: [ 3 true ]\n```\n\n"
     },
     "startsWith?": {
       "name": "startsWith?",
@@ -339,6 +527,10 @@
     "endsWith?": {
       "name": "endsWith?",
       "desc": "( B/Q F/Fq -- Sb ): leaves Status boolean for\n whether Block ends with Form (as per `=`), or if Quote\n ends with Fragment quote.\n\nAlways leaves true if Form or Fragment quote is empty.\n\n```\n'hello world' 'd' endsWith? leaves: true\n'hello world' 'world' endsWith? leaves: true\n'hello world' 'hello' endsWith? leaves: false\n\n[ 1 2 3 ] 3 endsWith? leaves: true\n[ 1 2 3 ] 1 endsWith? leaves: false\n```\n\n"
+    },
+    "adopt": {
+      "name": "adopt",
+      "desc": "( P C -- C ): same as `reparent`, but in different order."
     },
     "child": {
       "name": "child",
@@ -492,6 +684,10 @@
       "name": "sum",
       "desc": "( Lb -- Sum ): leaves decimal sum of List block elements.\n For more control (or if not always decimal), use `sumBy`.\n\n```\n[ ] sum leaves: 0\n[ 1 ] sum leaves: 1\n[ 1 2 3 ] sum leaves: 6\n```\n\n"
     },
+    "product": {
+      "name": "product",
+      "desc": "( Lb -- Product ): leaves decimal product of List block\n elements. For more control (or if not always decimal), take\n a look at `productBy`.\n\n```\n[ ] product leaves: 1\n[ 3 ] product leaves: 3\n[ 5 4 3 2 ] product leaves: 120\n```\n\n"
+    },
     "minmaxBy": {
       "name": "minmaxBy",
       "desc": "( Lb Tb -- Min Max ): leaves the minimum and maximum\n values in List block. Decimal values are obtained via the\n Transformation block, which is opened with each element\n of List block on top of an empty stack. If List block is\n empty, dies, so make sure to handle that yourself.\n\n```\n[ 1 2 3 ] [ ] minmaxBy leaves: [ 1 3 ]\n[ 'A short quote' 'A loooonger quote' 'Veeeeeeeeeeery long quote' ] [ count ] minmaxBy\n  leaves: [ 'A short quote' 'Veeeeeeeeeeery long quote' ]\n\n"
@@ -511,6 +707,14 @@
     "sumBy:": {
       "name": "sumBy:",
       "desc": "( Lb sumBy: Tb -- Sum ): infix version of `sumBy`.\n\n```\n[ 'a' 'aaa' 'aa' ] sumBy: count leaves: 6\n```\n\n"
+    },
+    "productBy": {
+      "name": "productBy",
+      "desc": "( Lb Tb -- P ): leaves Product of List block elements\n transformed into decimals by Transformation block. Similar\n to `sumBy`.\n\n```\n[ 'dave' 'john' ] [ count ] productBy leaves: 16 \"4 * 4\"\n```\n\n"
+    },
+    "productBy:": {
+      "name": "productBy:",
+      "desc": "( Lb productBy: Tb -- Sum ): infix version of `productBy`.\n\n```\n[ 'dave' 'john' ] productBy: count leaves: 16 \"4 * 4\"\n```\n\n"
     },
     "collect": {
       "name": "collect",
@@ -567,10 +771,6 @@
     "ls*": {
       "name": "ls*",
       "desc": "( -- Wl ): leaves Word list block that contains words\n defined (*resolvable*) in caller and in its relatives.\n\n```\n0 $: y [ 1 $: x ls* ] open leaves: [ [ \"...\" y x ] ]\n```\n\nAs opposed to `ls`, which leaves only block's own words:\n\n```\n0 $: y [ 1 $: x this ls ] open leaves: [ [ x ] ]\n```\n\n"
-    },
-    "toTape": {
-      "name": "toTape",
-      "desc": "( B -- Tb ): leaves Tape block for Block. Useful for e.g.\n comparing two blocks only for tape contents, when Block may\n have dictionary entries.\n\nLookup hierarchy is destroyed: Tape block is an orphan.\n\n```\n[ 1 2 3 ] $: a\na #x 0 pushes\na a toTape 2echo\n\"STDOUT: [ 1 2 3 · ${x :: 0} ]⏎\"\n\"STDOUT: [ 1 2 3 ]⏎\"\n```\n\n"
     },
     "hasDesc?": {
       "name": "hasDesc?",
@@ -652,6 +852,10 @@
       "name": "|around",
       "desc": "( L N -- Fab ): leaves a Forms around block with N/2 forms\n before the cursor, and N/2 forms after the cursor in List.\n\nForms around block may consist of less than N forms, but only\nwhen there are less than N forms in List (in this case, Forms\naround block is essentially a shallow copy of List).\n\nForms around block is an orphan with two dictionary entries:\n`start`, which stores the index of the first item in List,\nand `end`, which stores the index of the last item in List.\n\nDies when N is zero or when List is empty, because in these\ncases it is impossible to find the pivot form.\n\n```\n[ 1 2 3 4 ] $: block\nblock 2 |to\nblock echo \"STDOUT: [ 1 2 | 3 4 ]⏎ \"\nblock 2 |around echo \"STDOUT: [ 2 3 · ${start :: 1} ${end :: 3} ]⏎ \"\n```\n\n"
     },
+    "|ring": {
+      "name": "|ring",
+      "desc": "( B N -- Rb ): leaves a Ring block of N (if possible)\n forms left and right of the cursor in Block. If either\n side contains less forms than N, leaves all forms found\n in it. Puts cursor in Ring block after last form in the\n left-hand side of the ring.\n\nDies if N <= 0 (there are only >zero rings). Dies if Block\nis empty (because it cannot contain >zero rings).\n\nRing block also holds Block index of where the first\nform of the ring is (entry `firstAt`), and where the\nlast form of the ring is (entry `lastAt`).\n\nHere is a diagram which may help you understand what a\nring is:\n\n```text\n┌───────────────────────┐\n│ 3 |ring               │\n│                       │\n│   ┌───────────────┐   │\n│   │ 2 |ring       │   │\n│   │               │   │\n│   │   ┌───────┐   │   │\n│   │   │1 |ring│   │   │\n│   │   │       │   │   │\n│ 1 │ 2 │ 3 | 4 │ 5 │ 6 │\n│   │   │       │   │   │\n│   │   └───────┘   │   │\n│   │               │   │\n│   └───────────────┘   │\n│                       │\n└───────────────────────┘\n```\n\nAnd in code:\n\n```\n[ 1 2 3 \"|\" 4 5 6 ] dup 3 |to $: block\n\nblock 1 |ring toQuote leaves: '[ 3 | 4 · ${firstAt :: 2} ${lastAt :: 3} ]'\nblock 2 |ring toQuote leaves: '[ 2 3 | 4 5 · ${firstAt :: 1} ${lastAt :: 4} ]'\nblock 3 |ring toQuote leaves: '[ 1 2 3 | 4 5 6 · ${firstAt :: 0} ${lastAt :: 5} ]'\nblock 4 |ring toQuote leaves: '[ 1 2 3 | 4 5 6 · ${firstAt :: 0} ${lastAt :: 5} ]'\nblock 100 |ring toQuote leaves: '[ 1 2 3 | 4 5 6 · ${firstAt :: 0} ${lastAt :: 5} ]'\n```\n\n"
+    },
     "console:width": {
       "name": "console:width",
       "desc": "( -- Cw ): leaves Console width (in columns)."
@@ -714,7 +918,7 @@
     },
     "runTestsInGroup:": {
       "name": "runTestsInGroup:",
-      "desc": "( runTestsInGroup: G -- ): runs all test cases under Group.\nReports the results on-the-fly. Dies if Group doesn't exist."
+      "desc": "( runTestsInGroup: G -- B ): runs all test cases under Group.\nReports the results on-the-fly. Dies if Group doesn't exist.\nLeaves Boolean for whether all tests in Group succeeded."
     },
     "describe": {
       "name": "describe",
@@ -790,7 +994,7 @@
     },
     "disk:write": {
       "name": "disk:write",
-      "desc": "( Cq Fp -- ): (over)writes content of file at File path\n with Content quote. Dies if File path doesn't exist or\n doesn't point to a file."
+      "desc": "( Cq/B Fp -- ): (over)writes content of file at File path\n with Content quote/Byteslice. Dies if File path doesn't\n exist or doesn't point to a file."
     },
     "novika:version": {
       "name": "novika:version",
@@ -1066,7 +1270,7 @@
     },
     "asBoolean": {
       "name": "asBoolean",
-      "desc": "( F -- B ): asserts that Form is a Boolean form, dies if\n it's not.\n\nFor example, the following expression dies:\n\n```\n100 asWord\n```\n\nEt cetera for all other forms, except:\n\n```\ntrue asBoolean leaves: true\nfalse asBoolean leaves: false\n```\n\n`*asBoolean` hook can make a block usable in place of a\nboolean, provided its definition leaves a boolean or a\nblock that implements `*asBoolean`:\n\n```\n[ $: x x $: *asBoolean this ] @: a\ntrue a asBoolean \"beware: leaves an instance of a\"\ntrue a a asBoolean \"beware: leaves an instance of a\"\n```"
+      "desc": "( F -- B ): asserts that Form is a Boolean form, dies if\n it's not.\n\nFor example, the following expression dies:\n\n```\n100 asBoolean\n```\n\nEt cetera for all other forms, except:\n\n```\ntrue asBoolean leaves: true\nfalse asBoolean leaves: false\n```\n\n`*asBoolean` hook can make a block usable in place of a\nboolean, provided its definition leaves a boolean or a\nblock that implements `*asBoolean`:\n\n```\n[ $: x x $: *asBoolean this ] @: a\ntrue a asBoolean \"beware: leaves an instance of a\"\ntrue a a asBoolean \"beware: leaves an instance of a\"\n```"
     },
     "builtin?": {
       "name": "builtin?",
@@ -1083,6 +1287,14 @@
     "asColor": {
       "name": "asColor",
       "desc": "( F -- C ): asserts that Form is a Color form, dies if\n it's not.\n\nFor example, the following expression dies:\n\n```\n100 asColor\n```\n\nEt cetera for all other forms, except:\n\n```\n0 0 0 rgb asColor toQuote leaves: 'rgb(0, 0, 0)'\n```\n\n`*asColor` hook can make a block usable in place of a\ncolor, provided its definition leaves a color or a block\nthat implements `*asColor`:\n\n```\n[ $: x x $: *asColor this ] @: a\n0 0 0 rgb a asColor \"beware: leaves an instance of a\"\n0 0 0 rgb a a asColor \"beware: leaves an instance of a\"\n```"
+    },
+    "byteslice?": {
+      "name": "byteslice?",
+      "desc": "( F -- true/false ): leaves whether Form is a byteslice\n form, or a block that implements '*asByteslice'.\n\n```\n'hello world' toByteslice byteslice? leaves: true\n[ [ 'Hi!' toByteslice ] $: *asByteslice this ] open byteslice? leaves: true\n```"
+    },
+    "asByteslice": {
+      "name": "asByteslice",
+      "desc": "( F -- B ): asserts that Form is a Byteslice form, dies if\n it's not.\n\nFor example, the following expression dies:\n\n```\n100 asByteslice\n```\n\nEt cetera for all other forms, except:\n\n```\n'hello world' toByteslice asByteslice leaves: '[byteslice, consists of 11 mutable byte(s)]'\n```\n\n`*asByteslice` hook can make a block usable in place of\na byteslice, provided its definition leaves a byteslice\nor a block that implements `*asByteslice`:\n\n```\n[ $: x x $: *asByteslice this ] @: a\n'foo' toByteslice a asByteslice \"beware: leaves an instance of a\"\n'foo' toByteslice a a asByteslice \"beware: leaves an instance of a\"\n```"
     },
     "pushes": {
       "name": "pushes",
@@ -1126,7 +1338,19 @@
     },
     "fromLeft": {
       "name": "fromLeft",
-      "desc": "( B/Q I -- E/G ): leaves Index-th Element (Grapheme) in\n Block (Quote) from the left.\n\n```\n[ 1 2 3 ] 0 fromLeft leaves: 1\n```"
+      "desc": "( B/Q/Bf I -- E ): leaves Index-th Element from the left\n in Block, Quote, or Byteslice form.\n\n```\n[ 1 2 3 ] 0 fromLeft leaves: 1\n```"
+    },
+    "fromRight": {
+      "name": "fromRight",
+      "desc": "( B/Q/Bf I -- E ): leaves Index-th Element from the right\n in Block, Quote, or Byteslice form.\n\n```\n[ 1 2 3 ] 0 fromRight leaves: 3\n[ 1 2 3 ] 1 fromRight leaves: 2\n[ 1 2 3 ] 2 fromRight leaves: 1\n```"
+    },
+    "fromLeft*": {
+      "name": "fromLeft*",
+      "desc": "( B/Q/Bf N -- Eb/Rq/Rbf ): leaves Elements block (if given\n a Block), Result quote (if given a Quote), or Result\n byteslice form (if given a Byteslice form) with N forms/\n chars/bytes from left in Block/Quote/Byteslice form.\n If N is larger than Block/Quote/Byteslice form count,\n it is made equal to Block/Quote/Byteslice form count.\n Dies if N is negative.\n\n```\n[ 1 2 3 ] 1 fromLeft* leaves: [ [ 1 ] ]\n[ 1 2 3 ] 2 fromLeft* leaves: [ [ 1 2 ] ]\n[ 1 2 3 ] 3 fromLeft* leaves: [ [ 1 2 3 ] ]\n[ 1 2 3 ] 100 fromLeft* leaves: [ [ 1 2 3 ] ]\n'hello' 3 fromLeft* leaves: 'hel'\n```"
+    },
+    "fromRight*": {
+      "name": "fromRight*",
+      "desc": "( B/Q/Bf N -- Fb/Rq/Rbf ): leaves Elements block (if given\n a Block), Result quote (if given a Quote), or Result\n byteslice form (if given a Byteslice form) with N forms/\n chars/bytes from right in Block/Quote/Byteslice form.\n If N is larger than Block/Quote/Byteslice form count,\n it is made equal to Block/Quote/Byteslice form count.\n Dies if N is negative.\n\n```\n[ 1 2 3 ] 1 fromRight* leaves: [ [ 3 ] ]\n[ 1 2 3 ] 2 fromRight* leaves: [ [ 2 3 ] ]\n[ 1 2 3 ] 3 fromRight* leaves: [ [ 1 2 3 ] ]\n[ 1 2 3 ] 100 fromRight* leaves: [ [ 1 2 3 ] ]\n```"
     },
     "+": {
       "name": "+",
@@ -1164,6 +1388,14 @@
       "name": "sqrt",
       "desc": "( D -- R ): leaves the square Root of Decimal."
     },
+    "cos": {
+      "name": "cos",
+      "desc": "( Air -- Dc ): leaves Decimal cosine of Angle in radians."
+    },
+    "sin": {
+      "name": "sin",
+      "desc": "( Air -- Ds ): leaves Decimal sine of Angle in radians."
+    },
     "rand": {
       "name": "rand",
       "desc": "( -- Rd ): leaves a Random decimal between 0 and 1."
@@ -1174,7 +1406,7 @@
     },
     "count": {
       "name": "count",
-      "desc": "( B/Q -- N ): leaves N, the amount of elements (graphemes)\n in Block (Quote)."
+      "desc": "( B/Q/Bf -- N ): leaves N, the amount of elements/graphemes/\n bytes in Block/Quote/Byteslice form."
     },
     "|at": {
       "name": "|at",
@@ -1240,6 +1472,10 @@
       "name": "toQuote",
       "desc": "( F -- Qr ): leaves Quote representation of Form."
     },
+    "toByteslice": {
+      "name": "toByteslice",
+      "desc": "( Q -- B ): leaves immutable Byteslice for Quote."
+    },
     "replaceAll": {
       "name": "replaceAll",
       "desc": "( Sq Pq Q -- Rq ): replaces all instances of Pattern quote\n in Source quote with Quote. Leaves the Resulting quote.\n\n```\n'hello' 'l' 'y' replaceAll leaves: 'heyyo'\n```"
@@ -1250,7 +1486,7 @@
     },
     "die": {
       "name": "die",
-      "desc": "( D -- ): dies with Details quote."
+      "desc": "( D/Eo -- ): dies with Details quote/Error object."
     },
     "stitch": {
       "name": "stitch",
@@ -1292,13 +1528,61 @@
       "name": "toOrphan",
       "desc": "( B -- B ): makes Block an orphan (destroys the link with\n its parent).\n\n```\n0 $: x\n[ ] $: b\nb . x echo\n\"STDOUT: 0⏎\"\n\nb toOrphan leaves: [ [ ] ]\n. x\n\"Sorry: undefined dictionary property: x.\"\"\n```"
     },
+    "toTape": {
+      "name": "toTape",
+      "desc": "( B -- Tb ): leaves Tape block for Block. Useful for e.g.\n comparing two blocks only for tape contents, when Block may\n have dictionary entries.\n\nLookup hierarchy is destroyed: Tape block is an orphan.\n\n```\n[ 1 2 3 ] $: a\na #x 0 pushes\na a toTape 2echo\n\"STDOUT: [ 1 2 3 · ${x :: 0} ]⏎\"\n\"STDOUT: [ 1 2 3 ]⏎\"\n```"
+    },
     "desc": {
       "name": "desc",
-      "desc": "( F -- Dq ): leaves the Description quote of the given Form.\n\n```\n100 desc leaves: 'decimal number 100'\n'foobar' desc leaves: 'quote 'foobar''\n[ 1 2 3 ] desc leaves: 'a block'\n[ \"I am a block\" 1 2 3 ] desc leaves: 'I am a block'\ntrue desc leaves: 'boolean true'\n```"
+      "desc": "( F -- Dq ): leaves the Description quote of the given Form.\n\n```\n100 desc leaves: 'decimal number 100'\n'foobar' desc leaves: 'quote \\'foobar\\''\n[ 1 2 3 ] desc leaves: 'a block'\n[ \"I am a block\" 1 2 3 ] desc leaves: 'I am a block'\ntrue desc leaves: 'boolean true'\n```"
     },
     "typedesc": {
       "name": "typedesc",
       "desc": "( F -- Dq ): leaves the type Description quote of the\n given Form.\n\n```\n100 typedesc leaves: 'decimal'\n'foobar' typedesc leaves: 'quote'\n[ 1 2 3 ] typedesc leaves: 'block'\n[ \"I am a block\" 1 2 3 ] typedesc leaves: 'block'\ntrue typedesc leaves: 'boolean'\n```"
+    },
+    "nki:toBlock": {
+      "name": "nki:toBlock",
+      "desc": "( Bf -- B ): leaves Block for the given Byteslice form,\n assumed to contain a well-formed Novika image created\n with `nki:captureAll`, `nki:captureNeighborhood`, or\n otherwise. Dies if Byteslice form is an invalid Novika\n image, or isn't a Novika image.\n\nFor code example, see `nki:captureNeighborhood`."
+    },
+    "nki:captureAll": {
+      "name": "nki:captureAll",
+      "desc": "( B -- Bf ): thoroughly, recursively captures entire\n hierarchy of Block (its parents, prototype, friends,\n tape, and dictionary), and leaves the resulting Novika\n image as a Byteslice form.\n\nArchives image payload using Gzip, fast.\n\nIf you're a visual type of person, imagine this word and\nall related facilities as a kind of \"mold\", which carefully,\nin an ordered fashion \"fills up\" a maze, until all paths\nwere explored and all exits found.\n\nFor code example, see `nki:captureNeighborhood`."
+    },
+    "nki:captureNeighborhood": {
+      "name": "nki:captureNeighborhood",
+      "desc": "( B -- Bf ): like `nki:captureAll`, but rather than\n capturing all reachable blocks, captures only Block's\n neighborhood. Leaves the resulting Byteslice form.\n\nArchives image payload using Gzip, fast.\n\nWe store each block in Block's tape and dictionary in\na list, then ask that block to do the same. When recursion\nfinishes, the resulting list is called *block neighborhood*.\n\nParent, friends, and prototype of the given block are\nreconstructed *if and only if they are in the block\nneighborhood*.\n\n```\n[ 1 2 3 ] nki:captureNeighborhood $: imgN\n\nimgN toQuote leaves: '[byteslice, consists of 111 byte(s)]' \"yours may differ!\"\nimgN nki:toBlock leaves: [ [ 1 2 3 ] ]\n\n\"As opposed to nki:captureAll, which will capture EVERYTHING\n it can reach:\"\n[ 1 2 3 ] nki:captureAll $: imgA\n\nimgA toQuote leaves: '[byteslice, consists of 38298 byte(s)]' \"yours may differ!\"\n\n\"Note: [ 1 2 3 ] lives in a parallel universe now, with\n its own friends, prototypes, toplevel block, and so on!\n It doesn't have any links whatsoever to the whoever-it-was\n that called nki:captureAll!\"\nimgA nki:toBlock leaves: [ [ 1 2 3 ] ]\n```"
+    },
+    "nki:captureAllRaw": {
+      "name": "nki:captureAllRaw",
+      "desc": "( B -- Bf ): same as `nki:captureAll`, but doesn't archive\n image payload. May yield very large Byteslice forms."
+    },
+    "nki:captureNeighborhoodRaw": {
+      "name": "nki:captureNeighborhoodRaw",
+      "desc": "( B -- Bf ): same as `nki:captureNeighborhood`, but doesn't\n archive image payload. May yield large Byteslice forms."
+    },
+    "nki:captureAllGzipBest": {
+      "name": "nki:captureAllGzipBest",
+      "desc": "( B -- Bf ): same as `nki:captureAll`, but archives image\n payload using Gzip, best."
+    },
+    "nki:captureNeighborhoodGzipBest": {
+      "name": "nki:captureNeighborhoodGzipBest",
+      "desc": "( B -- Bf ): same as `nki:captureNeighborhood`, but\n archives image payload using Gzip, best."
+    },
+    "nki:captureAllBrotliFast": {
+      "name": "nki:captureAllBrotliFast",
+      "desc": "( B -- Bf ): same as `nki:captureAll`, but archives image\n payload using Brotli, fast."
+    },
+    "nki:captureNeighborhoodBrotliFast": {
+      "name": "nki:captureNeighborhoodBrotliFast",
+      "desc": "( B -- Bf ): same as `nki:captureNeighborhood`, but\n archives image payload using Brotli, fast."
+    },
+    "nki:captureAllBrotliBest": {
+      "name": "nki:captureAllBrotliBest",
+      "desc": "( B -- Bf ): same as `nki:captureAll`, but archives image\n payload using Brotli, best."
+    },
+    "nki:captureNeighborhoodBrotliBest": {
+      "name": "nki:captureNeighborhoodBrotliBest",
+      "desc": "( B -- Bf ): same as `nki:captureNeighborhood`, but\n archives image payload using Brotli, best."
     },
     "console:on": {
       "name": "console:on",
@@ -1395,6 +1679,10 @@
     "console:hadDownPressed?": {
       "name": "console:hadDownPressed?",
       "desc": "( -- B ): leaves Boolean for whether the DOWN ARROW key\n was pressed."
+    },
+    "console:hadCharPressed?": {
+      "name": "console:hadCharPressed?",
+      "desc": "( -- B ): leaves Boolean for whether EXCLUSIVELY a printable\n character key was pressed (no CTRL, ALT, etc.) Whether the\n SHIFT key was pressed or not is ignored."
     },
     "console:getCharPressed": {
       "name": "console:getCharPressed",
