@@ -272,6 +272,10 @@
       "name": "nip",
       "desc": "( A B -- B ): drops a form under the top.\n\n```\n1 2 nip leaves: [ 2 ]\n```\n\n"
     },
+    "nup": {
+      "name": "nup",
+      "desc": "( A B -- A A B ): duplicates a form under the top.\n\n```\n1 2 nup leaves: [ 1 1 2 ]\n```\n\n"
+    },
     "over": {
       "name": "over",
       "desc": "( A B -- A B A ): duplicates a form over the top.\n\n```\n1 2 over leaves: [ 1 2 1 ]\n```\n\n"
@@ -480,6 +484,14 @@
       "name": "|+",
       "desc": "( B N -- ): increments block cursor position: moves\n cursor forward N times in Block.\n\n```\n[ 1 2 3 ] $: block\nblock 1 |to\nblock toQuote leaves: '[ 1 | 2 3 ]'\nblock 1 |+\nblock toQuote leaves: '[ 1 2 | 3 ]'\nblock 1 |+\nblock toQuote leaves: '[ 1 2 3 ]'\n```\n\n"
     },
+    "|clamp": {
+      "name": "|clamp",
+      "desc": "( B N -- ): moves the cursor in Block to N. If N\n is negative, the cursor is moved to 0. If N is greater\n than the amount of forms in Block, the cursor is moved\n to the end of Block.\n\n```\n[ 1 2 3 ] $: x\nx 1 |clamp\nx toQuote leaves: '[ 1 | 2 3 ]'\nx 1000 |clamp\nx toQuote leaves: '[ 1 2 3 ]'\nx -1000 |clamp\nx toQuote leaves: '[ | 1 2 3 ]'\n```\n\n"
+    },
+    "|hydrate": {
+      "name": "|hydrate",
+      "desc": "( Lb N B -- ): moves the cursor in List block to N,\n then hydrates List block with Block. After Block had\n executed *successfully*, moves the cursor in List\n block back to where it was before `|hydrate` (clamped\n to either end, if necessary).\n\n```\n[ 1 2 3 ] $: x\n\nx 1 |to\nx toQuote leaves: '[ 1 | 2 3 ]'\n\nx 2 [ + ] |hydrate\nx toQuote leaves: '[ 3 | 3 ]'\n\nx 2 [ 2drop ] |hydrate\nx toQuote leaves: '[ ]'\n```\n\n"
+    },
     "gulp": {
       "name": "gulp",
       "desc": "( F B -- ): `shove`s Form into Block, drops both.\n\n```\n3 [ 1 2 ] keep: gulp leaves: [ [ 1 2 3 ] ]\n```\n\n"
@@ -560,9 +572,17 @@
       "name": "|->",
       "desc": "( Lb |-> B -- Lb ): infix version of `|slideRight`."
     },
+    "|~>": {
+      "name": "|~>",
+      "desc": "( Lb |~> B -- Lb ): similar to `|->`, but remembers the\n cursor position in List block and restores it after all\n items were visited by Block (clamping to either end,\n if necessary).\n\n```\n[ 1 2 3 ] $: x\n\nx 1 |to\nx toQuote leaves: '[ 1 | 2 3 ]'\n\nx |~> [ 1 + ]\nx toQuote leaves: '[ 1 | 3 4 ]'\n```\n\n"
+    },
     "||->": {
       "name": "||->",
       "desc": "( Lb ||-> B -- Lb ): same as `|->`, but moves the cursor\n to the start of List block first, then executes Block and\n so on. See `|->` and especially `|slideRight` for more\n information on what all of this means.\n\n```\n[ 1 2 3 ] ||-> [ 2 * ] leaves: [ [ 2 4 6 ] ]\n```\n\n"
+    },
+    "||~>": {
+      "name": "||~>",
+      "desc": "( Lb |~> B -- Lb ): similar to `||->`, but remembers\n the cursor position in List block and restores it after\n all items were visited by Block (clamping to either end,\n if necessary).\n\n```\n[ 1 2 3 ] $: x\n\nx 1 |to\nx toQuote leaves: '[ 1 | 2 3 ]'\n\nx ||~> [ 1 + ]\nx toQuote leaves: '[ 2 | 3 4 ]'\n```\n\n"
     },
     "|slideLeft": {
       "name": "|slideLeft",
@@ -726,7 +746,7 @@
     },
     "groupBy": {
       "name": "groupBy",
-      "desc": "( B Gb -- Gl ): groups forms in Block according to\n Grouper block. Leaves a Group list. Grouper block is\n opened with consequent items on top of an empty stack.\n Grouper block can leave any form except block. Order of\n groups in Group list is the same as in Block, i.e., if\n the first item in Block is is in group G1, then the first\n group in Group list will be G1.\n\nIf necessary, the form Grouper block leaves for a particular\ngroup can be accessed with `.id` on each group block in\nGroup list.\n\nNote though, that Group members do not have access to\ntheir Grouper block's `id`.\n\n```\n[ 1 2 3 ] [ 1 > ] groupBy leaves: [ [ [ 1 ] [ 2 3 ] ] ]\n[ 1 2 3 ] [ 1 <= ] groupBy leaves: [ [ [ 1 ] [ 2 3 ] ] ]\n\n[ 1 2 3 ] [ 1 <= ] groupBy [ .id ] map\n  leaves: [ [ true false ] ] \"The two groups, true and false\".\n\n[ 1 2 3 ] [ 1 <= 'foo' 'bar' sel ] groupBy [ dup .id 2enclose ] map\n  leaves: [ [ [ [ 1 ] 'foo' ] [ [ 2 3 ] 'bar' ] ] ]\n```\n\n"
+      "desc": "( B Gb -- Gl ): groups forms in Block according to\n Grouper block. Leaves a Group list. Grouper block is\n opened with consequent items on top of an empty stack.\n Grouper block can leave any form except block. Order of\n groups in Group list is the same as in Block, i.e., if\n the first item in Block is is in group G1, then the first\n group in Group list will be G1.\n\nIf necessary, the form Grouper block leaves for a particular\ngroup can be accessed with `.id` on each group block in\nGroup list.\n\nNote though, that Group members do not have access to\ntheir Grouper block's `id`.\n\n```\n[ 1 2 3 ] [ 1 > ] groupBy leaves: [ [ [ 1 ] [ 2 3 ] ] ]\n[ 1 2 3 ] [ 1 <= ] groupBy leaves: [ [ [ 1 ] [ 2 3 ] ] ]\n\n[ 1 2 3 ] [ 1 <= ] groupBy [ .id ] map\n  leaves: [ [ true false ] ] \"The two groups, true and false.\"\n\n[ 1 2 3 ] [ 1 <= 'foo' 'bar' sel ] groupBy [ dup .id 2enclose ] map\n  leaves: [ [ [ [ 1 ] 'foo' ] [ [ 2 3 ] 'bar' ] ] ]\n```\n\n"
     },
     "groupBy:": {
       "name": "groupBy:",
@@ -762,7 +782,7 @@
     },
     "concat!": {
       "name": "concat!",
-      "desc": "( B1 B2 -- B1 ): adds elements from B2 into B1.\n\n```\n[ 1 2 3 ] [ 4 5 6 ] concat!\n  leaves: [ [ 1 2 3 4 5 6 ] ]\n```\n\n"
+      "desc": "( B1 B2 -- B1 ): adds elements before cursor in B2\n after cursor in B1. Advances the cursor in B1 by the\n number of added elements.\n\n```\n[ 1 2 3 ] [ 4 5 6 ] concat!\n  leaves: [ [ 1 2 3 4 5 6 ] ]\n```\n\n"
     },
     "concat": {
       "name": "concat",
@@ -922,7 +942,7 @@
     },
     "describe": {
       "name": "describe",
-      "desc": "( describe Dq B -- ): groups multiple test cases (listed\n in Block) under a single Description quote.\n\nDescribes can be grouped under the so-called *test groups*. By\ndefault, they are grouped under the test group called 'global'.\n\nYou can group under a different test group using `in`. The\nfollowing describes are grouped under 'global':\n\n```\ndescribe 'Foo' [\n  it should 'work' [ \"...\" ]\n]\n\ndescribe 'Bar' [\n  it should 'a' [ \"...\" ]\n  it should 'b' [ \"...\" ]\n]\n```\n\nThe following describes are grouped under 'foo':\n\n```\ndescribe 'Foo' [\n  in foo\n\n  it should 'work' [ \"...\" ]\n]\n\ndescribe 'Bar' [\n  in foo\n\n  it should 'a' [ \"...\" ]\n  it should 'b' [ \"...\" ]\n]\n```\n\nYou can run a test group using the word `runTestsInGroup:`.\nIt will run all tests and echo the test report to the standard\noutput on the fly. With tests describes as above, you can\nrun them with:\n\n```\nrunTestsInGroup: foo\n```\n\n"
+      "desc": "( describe Dq B -- ): groups multiple test cases (listed\n in Block) under a single Description quote.\n\nDescribes can be grouped under so-called *test groups*. Unless\nyou provide a group (or several) yourself, the describe will\nbelong to the test group called 'rogue'.\n\nYou can specify one or more groups the describe will belong\nto using `in`. The following describes are grouped under 'rogue':\n\n```\ndescribe 'Foo' [\n  it should 'work' [ \"...\" ]\n]\n\ndescribe 'Bar' [\n  it should 'a' [ \"...\" ]\n  it should 'b' [ \"...\" ]\n]\n```\n\nThe following describes are grouped under 'foo':\n\n```\ndescribe 'Foo' [\n  in foo\n\n  it should 'work' [ \"...\" ]\n]\n\ndescribe 'Bar' [\n  in foo\n\n  it should 'a' [ \"...\" ]\n  it should 'b' [ \"...\" ]\n]\n```\n\nYou can run a test group using the word `runTestsInGroup:`.\nIt will run all tests and echo the test report to the standard\noutput on the fly. With describes as above, that is, belonging\nto the group 'foo', you can run them like so:\n\n```\nrunTestsInGroup: foo\n```\n\nDescribes can belong to multiple groups:\n\n```\ndescribe 'Foo' [\n  in a\n  in b\n\n  it should 'happy path' [ true true assert= ]\n]\n\ndescribe 'Bar' [\n  in a\n\n  it should 'sad path' [ true false assert= ]\n]\n\nrunTestsInGroup: a  \"runs Foo and Bar\"\nrunTestsInGroup: b  \"runs Foo\"\n```\n\n"
     },
     "leaves:": {
       "name": "leaves:",
@@ -940,61 +960,9 @@
       "name": "choose",
       "desc": "( F Cl -- Cb' ): high-level conditional. Acts similar to `case`\n or `switch` in other languages. Takes a Form to match over, and\n a Case list in the form `[ Condition Case-Body Condition Case-Body ... ]`.\n Leaves the result of Case body corresponding to the condition that\n matched Form, otherwise (if no cases matched), Form itself.\n\n```novika\n1 to: 100 each: [\n  [ [ 15 /? ] 'FizzBuzz'\n    [  5 /? ] 'Buzz'\n    [  3 /? ] 'Fizz'\n  ] choose echo\n]\n```\n\n"
     },
-    "$(": {
-      "name": "$(",
-      "desc": "( E... -- ): Same as `$:` but allows to define multiple\n Entries at the same time, and in the 'human-readable' order.\n\n```\n[ $( x y ) this ] @: point\n\n100 200 point -> [ x y ]\n  leaves: [ [ 100 200 ] ]\n```\n\n"
-    },
-    "disk:has?": {
-      "name": "disk:has?",
-      "desc": "( Pq -- true/false ): leaves whether Path quote exists\n on the disk."
-    },
-    "disk:canRead?": {
-      "name": "disk:canRead?",
-      "desc": "( Pq -- true/false ): leaves whether Path quote exists\n and is readable."
-    },
-    "disk:hasDir?": {
-      "name": "disk:hasDir?",
-      "desc": "( Pq -- true/false ): leaves whether Path quote exists\n and points to a directory."
-    },
-    "disk:hasFile?": {
-      "name": "disk:hasFile?",
-      "desc": "( Pq -- true/false ): leaves whether Path quote exists\n and points to a file."
-    },
-    "disk:hasSymlink?": {
-      "name": "disk:hasSymlink?",
-      "desc": "( Pq -- true/false ): leaves whether Path quote exists\n and points to a symlink."
-    },
-    "disk:dirEmpty?": {
-      "name": "disk:dirEmpty?",
-      "desc": "( Ptd -- B ): leaves Boolean for whether Path to directory\n is empty. Dies if Path to directory points to something\n other than a directory, or doesn't exist."
-    },
-    "disk:join": {
-      "name": "disk:join",
-      "desc": "( Bp Cp -- P ): leaves Path, which is the result of joining Base\n path and Child path using the platform-specific path separator.\n\n```\n'hello' 'world' disk:join leaves: 'hello/world' \"On Unix\"\n'hello' 'world' disk:join leaves: 'hello\\world' \"On Windows\"\n```"
-    },
-    "disk:pwd": {
-      "name": "disk:pwd",
-      "desc": "( -- Wd ): leaves current Working directory."
-    },
-    "disk:touch": {
-      "name": "disk:touch",
-      "desc": "( P -- ): creates an empty file at Path. Does nothing\n if Path already exists."
-    },
-    "disk:mkdir": {
-      "name": "disk:mkdir",
-      "desc": "( P -- ): creates an empty directory at Path, including\n any non-existing intermediate directories. Does nothing\n if Path already exists."
-    },
-    "disk:copy": {
-      "name": "disk:copy",
-      "desc": "( S D -- ): copies Source (quote path to a file, symlink,\n or directory) to Destination (also a quote).\n\nIf Source is a directory, copies it recursively.\nIf copy process failed, dies."
-    },
-    "disk:read": {
-      "name": "disk:read",
-      "desc": "( F -- C ): reads and leaves the Contents of File. Dies\n if there is no File."
-    },
-    "disk:write": {
-      "name": "disk:write",
-      "desc": "( Cq/B Fp -- ): (over)writes content of file at File path\n with Content quote/Byteslice. Dies if File path doesn't\n exist or doesn't point to a file."
+    "${": {
+      "name": "${",
+      "desc": "( E... -- ): Same as `$:` but allows to define multiple\n Entries at the same time, and in the 'human-readable' order.\n\n```\n[ ${ x y } this ] @: point\n\n100 200 point -> [ x y ]\n  leaves: [ [ 100 200 ] ]\n```\n\n"
     },
     "novika:version": {
       "name": "novika:version",
@@ -1306,19 +1274,19 @@
     },
     "entry:submit": {
       "name": "entry:submit",
-      "desc": "( B N F -- ): changes the value form of an existing definition\n of Name in Block to Form, but keeps its resolution action\n (open/push)."
+      "desc": "( Ss N F -- ): replaces the value form of an existing\n definition for Name in Submittable store (usually a block)\n to Form. Does not change whether the definition opens\n or pushes."
     },
     "entry:exists?": {
       "name": "entry:exists?",
-      "desc": "( D N -- true/false ): leaves whether Dictionary can fetch\n value for Name."
+      "desc": "( Rs N -- true/false ): leaves whether Readable store\n (usually a block) can fetch value for Name."
     },
     "entry:fetch": {
       "name": "entry:fetch",
-      "desc": "( B N -- F ): leaves the value Form under Name in Block's\n dictionary. Does not open the value form."
+      "desc": "( Rs N -- F ): leaves the value Form with the given Name\n in Readable store (usually a block). Does not open the\n value form. Dies if Store does not contain an entry\n for Name."
     },
     "entry:fetch?": {
       "name": "entry:fetch?",
-      "desc": "( B N -- F true / false ): leaves the value Form under\n Name in Block's dictionary followed by `true`, or `false`\n if no such entry is in Block.\n\n```\n[ ] $: a\na #x 100 pushes\n\na #x entry:fetch? leaves: [ 100 true ]\na #y entry:fetch? leaves: [ false ]\n```"
+      "desc": "( Rs N -- F true / false ): leaves the value Form with the\n given Name in Readable store (usually a block) if an entry\n for Name exists there, and/or a boolean indicating the\n latter: `true` (exists), or `false` (does not exist).\n\n```\n[ ] $: a\na #x 100 pushes\n\na #x entry:fetch? leaves: [ 100 true ]\na #y entry:fetch? leaves: [ false ]\n```"
     },
     "entry:flatFetch?": {
       "name": "entry:flatFetch?",
@@ -1326,7 +1294,7 @@
     },
     "entry:isOpenEntry?": {
       "name": "entry:isOpenEntry?",
-      "desc": "( B N -- true/false ): leaves whether an entry called Name\n in Block is an open entry."
+      "desc": "( Rs N -- true/false ): leaves whether an entry with the\n given Name in Readable store (usually a block) is an\n open entry. Dies if Readable store has no entry with\n the given Name."
     },
     "shallowCopy": {
       "name": "shallowCopy",
@@ -1378,11 +1346,19 @@
     },
     "round": {
       "name": "round",
-      "desc": "( D -- Rd ): rounds Decimal towards the nearest integer,\n leaves the corresoinding Rounded decimal. If both neighboring\n integers are equidistant, rounds towards the even neighbor\n (Banker's rounding).\n\n```\n1 round leaves: 1\n1.23 round leaves: 1\n\n1.67 round leaves: 2\n1.5 round leaves: 2\n\n2.5 round leaves: 2 \"rounds towards the even neighbor\"\n```"
+      "desc": "( D -- Rd ): rounds Decimal towards the nearest integer,\n leaves the corresoinding Rounded decimal. If both neighboring\n integers are equidistant, rounds towards the even neighbor\n (Banker's rounding).\n\n```\n1 round leaves: 1\n1.23 round leaves: 1\n\n1.5 round leaves: 2\n1.67 round leaves: 2\n\n2.5 round leaves: 2 \"rounds towards the even neighbor\"\n```"
+    },
+    "floor": {
+      "name": "floor",
+      "desc": "( D -- Rd ): rounds Decimal *down* towards the nearest integer,\n leaves the corresoinding Rounded decimal.\n\n```\n1 floor leaves: 1\n1.23 floor leaves: 1\n\n1.5 floor leaves: 1\n1.67 floor leaves: 1\n\n2.5 floor leaves: 2\n\n-2.5 floor leaves: -3 \"rounds down!\"\n```"
+    },
+    "ceil": {
+      "name": "ceil",
+      "desc": "( D -- Rd ): rounds Decimal *up* towards the nearest integer,\n leaves the corresoinding Rounded decimal.\n\n```\n1 ceil leaves: 1\n1.23 ceil leaves: 2\n\n1.5 ceil leaves: 2\n1.67 ceil leaves: 2\n\n2.5 ceil leaves: 3\n\n-2.5 ceil leaves: -2 \"rounds up!\"\n```"
     },
     "trunc": {
       "name": "trunc",
-      "desc": "( D -- Td ): omits all past the '.' in Decimal, leaves\n the resulting Truncated decimal.\n\n```\n1 trunc leaves: 1\n1.23 trunc leaves: 1\n1.67 trunc leaves: 1\n2.5 trunc leaves: 2\n```"
+      "desc": "( D -- Rd ): rounds Decimal towards zero, leaves the resulting\n Rounded decimal.\n\n```\n1 trunc leaves: 1\n1.23 trunc leaves: 1\n1.5 trunc leaves: 1\n1.67 trunc leaves: 1\n2.5 trunc leaves: 2\n\n-2.3 trunc leaves:  -2\n```"
     },
     "sqrt": {
       "name": "sqrt",
@@ -1407,6 +1383,14 @@
     "count": {
       "name": "count",
       "desc": "( B/Q/Bf -- N ): leaves N, the amount of elements/graphemes/\n bytes in Block/Quote/Byteslice form."
+    },
+    "chr": {
+      "name": "chr",
+      "desc": "( Uc -- Q ): leaves a quote that consists of a single\n character with the given Unicode codepoint."
+    },
+    "ord": {
+      "name": "ord",
+      "desc": "( Q -- Uc ): leaves the Unicode codepoint for the first\n character in Quote. Dies if Quote is empty."
     },
     "|at": {
       "name": "|at",
@@ -1435,6 +1419,10 @@
     "shove": {
       "name": "shove",
       "desc": "( [ ... | ... ]B E ~> [ ... E | ... ]B -- ): adds Element\n before cursor in Block (and moves cursor forward once),\n drops both."
+    },
+    "shove*": {
+      "name": "shove*",
+      "desc": "( [ ...bl | ...br ]B [ ...el | ...er ]Eb ~> [ ...bl ...el | ...br ]B -- ): adds\n elements before cursor in Element block after the cursor in Block.\n\n```\n[ 1 2 3 ] $: xs\nxs [ 4 5 6 ] shove*\nxs leaves: [ [ 1 2 3 4 5 6 \"|\" ] ]\n\n[ 1 2 3 ] $: ys\nys 1 |to \"[ 1 | 2 3 ]\"\nys [ 100 200 300 ] shove* \"[ 1 100 200 300 | 2 3 ]\"\nys dup count |to\nys leaves: [ [ 1 100 200 300 2 3 ] ]\n```"
     },
     "eject": {
       "name": "eject",
@@ -1506,11 +1494,11 @@
     },
     "unfriend": {
       "name": "unfriend",
-      "desc": "( B F -- ): removes Friend from Block's friend list. Does\n nothing if Friend is not in the friend list. See `befriend`.\n\n```\n[ 100 $: x this ] open $: a\n[ 200 $: y this ] open $: b\na b befriend\na.x echo\n\"STDOUT: 100⏎\"\na.y echo\n\"STDOUT: 200⏎\"\na b unfriend\na.x echo\n\"STDOUT: 100⏎\"\na.y echo\n\"Sorry: undefined dictionary property: y.\"\n```"
+      "desc": "( B F -- ): removes Friend from Block's friend list. Does\n nothing if Friend is not in the friend list. See `befriend`.\n\n```\n[ 100 $: x this ] open $: a\n[ 200 $: y this ] open $: b\na b befriend\na.x echo\n\"STDOUT: 100⏎\"\na.y echo\n\"STDOUT: 200⏎\"\na b unfriend\na.x echo\n\"STDOUT: 100⏎\"\na.y echo\n\"Sorry: no value form found for 'y'.\"\n```"
     },
     "friends": {
       "name": "friends",
-      "desc": "( B -- Fl ): leaves Friend list of Block. See `befriend`.\n\n```\n[ 100 $: x this ] open $: a\n[ 200 $: y this ] open $: b\na b befriend\na friends count echo\n\"STDOUT: 1⏎\"\na friends first b same? echo\n\"STDOUT: true⏎\"\na.y echo\n\"STDOUT: 200⏎\"\na friends [ drop ] hydrate\na friends count echo\n\"STDOUT: 0⏎\"\na.y echo\n\"Sorry: undefined dictionary property: y.\"\n```"
+      "desc": "( B -- Fl ): leaves Friend list of Block. See `befriend`.\n\n```\n[ 100 $: x this ] open $: a\n[ 200 $: y this ] open $: b\na b befriend\na friends count echo\n\"STDOUT: 1⏎\"\na friends first b same? echo\n\"STDOUT: true⏎\"\na.y echo\n\"STDOUT: 200⏎\"\na friends [ drop ] hydrate\na friends count echo\n\"STDOUT: 0⏎\"\na.y echo\n\"Sorry: no value form found for 'y'.\"\n```"
     },
     "slurp": {
       "name": "slurp",
@@ -1526,7 +1514,7 @@
     },
     "toOrphan": {
       "name": "toOrphan",
-      "desc": "( B -- B ): makes Block an orphan (destroys the link with\n its parent).\n\n```\n0 $: x\n[ ] $: b\nb . x echo\n\"STDOUT: 0⏎\"\n\nb toOrphan leaves: [ [ ] ]\n. x\n\"Sorry: undefined dictionary property: x.\"\"\n```"
+      "desc": "( B -- B ): makes Block an orphan (destroys the link with\n its parent).\n\n```\n0 $: x\n[ ] $: b\nb . x echo\n\"STDOUT: 0⏎\"\n\nb toOrphan leaves: [ [ ] ]\n. x\n\"Sorry: no value form found for 'x'\"\"\n```"
     },
     "toTape": {
       "name": "toTape",
@@ -1707,6 +1695,158 @@
     "console:clear": {
       "name": "console:clear",
       "desc": "( -- ): clears console with primary colors."
+    },
+    "disk:has?": {
+      "name": "disk:has?",
+      "desc": "( Pq -- true/false ): leaves whether Path quote exists\n on the disk."
+    },
+    "disk:canRead?": {
+      "name": "disk:canRead?",
+      "desc": "( Pq -- true/false ): leaves whether Path quote exists\n and is readable."
+    },
+    "disk:hasDir?": {
+      "name": "disk:hasDir?",
+      "desc": "( Pq -- true/false ): leaves whether Path quote exists\n and points to a directory."
+    },
+    "disk:hasFile?": {
+      "name": "disk:hasFile?",
+      "desc": "( Pq -- true/false ): leaves whether Path quote exists\n and points to a file."
+    },
+    "disk:hasSymlink?": {
+      "name": "disk:hasSymlink?",
+      "desc": "( Pq -- true/false ): leaves whether Path quote exists\n and points to a symlink."
+    },
+    "disk:dirEmpty?": {
+      "name": "disk:dirEmpty?",
+      "desc": "( Ptd -- B ): leaves Boolean for whether Path to directory\n is empty. Dies if Path to directory points to something\n other than a directory, or doesn't exist."
+    },
+    "disk:join": {
+      "name": "disk:join",
+      "desc": "( Bp Cp -- P ): leaves Path, which is the result of joining Base\n path and Child path using the platform-specific path separator.\n\n```\n'hello' 'world' disk:join leaves: 'hello/world' \"On Unix\"\n'hello' 'world' disk:join leaves: 'hello\\world' \"On Windows\"\n```"
+    },
+    "disk:pwd": {
+      "name": "disk:pwd",
+      "desc": "( -- Wd ): leaves current Working directory."
+    },
+    "disk:touch": {
+      "name": "disk:touch",
+      "desc": "( P -- ): creates an empty file at Path. Does nothing\n if Path already exists."
+    },
+    "disk:mkdir": {
+      "name": "disk:mkdir",
+      "desc": "( P -- ): creates an empty directory at Path, including\n any non-existing intermediate directories. Does nothing\n if Path already exists."
+    },
+    "disk:copy": {
+      "name": "disk:copy",
+      "desc": "( S D -- ): copies Source (quote path to a file, symlink,\n or directory) to Destination (also a quote).\n\nIf Source is a directory, copies it recursively.\nIf copy process failed, dies."
+    },
+    "disk:read": {
+      "name": "disk:read",
+      "desc": "( F -- C ): reads and leaves the Contents of File. Dies\n if there is no File."
+    },
+    "disk:write": {
+      "name": "disk:write",
+      "desc": "( Cq/B Fp -- ): (over)writes content of file at File path\n with Content quote/Byteslice. Dies if File path doesn't\n exist or doesn't point to a file."
+    },
+    "ffi:library?": {
+      "name": "ffi:library?",
+      "desc": "( F -- true/false ): leaves whether Form is a foreign\n library form.\n\n```\n'foo' ffi:getLibrary ffi:library? leaves: true\n```"
+    },
+    "ffi:layout?": {
+      "name": "ffi:layout?",
+      "desc": "( F -- true/false ): leaves whether Form is a foreign\n layout form.\n\n```\n[ x i32 y i32 ] ffi:createLayout $: point\n\npoint ffi:layout? leaves: true\n```"
+    },
+    "ffi:struct&?": {
+      "name": "ffi:struct&?",
+      "desc": "( F -- true/false ): leaves whether Form is a struct\n reference view form.\n\n```\n[ x i32 y i32 ] ffi:createLayout $: point\n\npoint ffi:allocateStruct& $: point&\npoint& ffi:struct&? leaves: true\n```"
+    },
+    "ffi:struct~?": {
+      "name": "ffi:struct~?",
+      "desc": "( F -- true/false ): leaves whether Form is an inline\n struct view form.\n\n```\n[ x i32 y i32 ] ffi:createLayout $: point\n\npoint ffi:allocateStruct~ $: point~\npoint~ ffi:struct~? leaves: true\n```"
+    },
+    "ffi:union?": {
+      "name": "ffi:union?",
+      "desc": "( F -- true/false ): leaves whether Form is a union\n view form.\n\n```\n[ chr char ord u8 ] ffi:createLayout $: quux\n\nquux ffi:allocateUnion $: quuxU\nquuxU ffi:union? leaves: true\n```"
+    },
+    "ffi:hole?": {
+      "name": "ffi:hole?",
+      "desc": "( F -- true/false ): leaves whether Form is a hole.\n\n```\n#i32 ffi:hole $: intHole\n\nintHole ffi:hole? leaves: true\n```"
+    },
+    "ffi:getLibrary?": {
+      "name": "ffi:getLibrary?",
+      "desc": "( I -- Lf true / false ): leaves Library form followed by true\n if dynamic library with the given Id exists and was loaded &\n retrieved successfully; otherwise, leaves false.\n\nOpening Library form allows one to expose functions from the\nunderlying dynamic library (.so on Linux, .dll on Windows,\n.dylib on Mac). See FFI documentation on GitHub Wiki for more\ndetails and examples.\n\n```\n'SDL2' ffi:getLibrary? leaves: [ \"[foreign library]\" true ]\n'random-nonexisting-library' ffi:getLibrary? leaves: false\n```"
+    },
+    "ffi:getLibrary": {
+      "name": "ffi:getLibrary",
+      "desc": "( I -- Lf ): leaves Library form if dynamic library with the\n given Id exists and was loaded & retrieved successfully;\n otherwise, dies.\n\nOpening Library form allows one to expose functions from the\nunderlying dynamic library (.so on Linux, .dll on Windows,\n.dylib on Mac). See FFI documentation on GitHub Wiki for more\ndetails and examples.\n\n```\n'SDL2' ffi:getLibrary ffi:library? leaves: true\n'random-nonexisting-library' ffi:getLibrary \"Dies: no such library\"\n```"
+    },
+    "ffi:createLayout": {
+      "name": "ffi:createLayout",
+      "desc": "( Lb -- Slf ): parses Layout block and leaves the resulting\n Struct layout form.\n\nStruct layouts are a generalization over structs (heap-\nallocated and stack-allocated) and unions. They literally\ndescribe how structs (unions) are layed out in memory.\n\nLayout block consists of *name words followed by type words*.\nSee the example below. A reference to another struct layout\ncan be made in Layout block using the prefixes `&` (heap-\nallocated struct, i.e., pointer to struct), `~` (inline or\nstack-allocated struct), and `?` (stack-allocated union).\n\nInline struct cycles are forbidden. Union cycles are forbidden.\nEither could be hidden behind a reference/pointer.\n\nLayout block is parsed lazily (on first use, e.g., by `toQuote`,\n`allocateStruct` variants, `=`, etc.) Therefore, you can define\nself-referential structs, mutually referential structs, and\nreference layouts that are defined later.\n\nSee FFI documentation on GitHub Wiki for a list of available\ntypes and the corresponding C types.\n\n```\n[ x f32\n  y f32\n] ffi:createLayout $: point\n\n[ datum ~point    \"<- inline struct\"\n  next &pointNode \"<- struct reference\"\n] ffi:createLayout $: pointNode\n\n[ asPoint &point\n  asPointNode ~pointNode\n] ffi:createLayout $: pointNodeUnion\n\n[ type u8\n  value ?pointNodeUnion \"<- stack-allocated union\"\n] ffi:createLayout $: pointNodeOrPoint\n```"
+    },
+    "ffi:allocateStruct~": {
+      "name": "ffi:allocateStruct~",
+      "desc": "( Slf -- Isv ): allocates Inline struct view for the\n given Struct layout form. If the struct is no longer in\n use, it is freed by the GC automatically.\n\nThis word is **unsafe**: the resulting Inline struct view is\nin an undefined state (may contain junk) before you (or the\nC code you pass it to) fills it with good values. Showing\nthe struct view left by this word to clients may expose your\nprogram to a whole class of security vulnerabilities.\n\n```\n[ x i32 y i32 ] ffi:createLayout $: point\n\npoint ffi:allocateStruct~ $: point~\npoint~ #x 123 entry:submit\npoint~ #y 456 entry:submit\npoint~ toQuote leaves: '~⟨x=123_i32, y=456_i32⟩'\n```"
+    },
+    "ffi:buildStruct~": {
+      "name": "ffi:buildStruct~",
+      "desc": "( Eb Slf -- Isv ): allocates and fills Inline struct\n view with entries by asking Entry block for them.\n\nIf Entry block is missing an entry matching a field that\nStruct layout form declares, and that field is of type\n`pointer` or struct reference (`&`), `none` (C nullptr)\nis used as the value. Dies if Entry block is missing\nmatching entry or entries for fields of other types.\n\n```\n[ x i32 y i32 ] ffi:createLayout $: point\n\n100 $: x\n200 $: y\n\n\"Note: `this` has entries called `x` and `y`. `point` has\n fields called `x` and `y`. A match!\"\nthis point ffi:buildStruct~ $: point~\n\npoint~ toQuote leaves: '~⟨x=100_i32, y=200_i32⟩'\n```"
+    },
+    "ffi:asStruct~": {
+      "name": "ffi:asStruct~",
+      "desc": "( A Slf -- Isv ): creates and leaves Inline struct view\n for the given Address, according to Struct layout form.\n\nThis word is **unsafe**: it does not check whether Address\npoints at something that is layed out according to Struct\nlayout form. Passing 0 (none aka null pointer) for Address\nwill lead to segfault. Passing Address that is outside of\nyour program's memory will lead to segfault. Passing Address\nthat *is* in the bounds of your program's memory, but one\nnot pointing at a struct in accordance with Struct layout\nform, will lead to undefined behavior (most likely junk\nvalues in Inline struct view).\n\n```\n[ x i32 y i32 ] ffi:createLayout $: point\n\n100 $: x\n200 $: y\nthis point ffi:buildStruct~ $: point~\n\npoint~ ffi:addressof $: addr\n\naddr point ffi:asStruct~ $: addrPoint~\naddrPoint~.x leaves: x\naddrPoint~.y leaves: y\naddrPoint~ toQuote leaves: '~⟨x=100_i32, y=200_i32⟩'\n```"
+    },
+    "ffi:allocateStruct&": {
+      "name": "ffi:allocateStruct&",
+      "desc": "( Slf -- Srv ): allocates Struct reference view for the\n given Struct layout form. If the struct is no longer in\n use, it is freed by the GC automatically.\n\nThis word is **unsafe**: the resulting Struct reference view is\nin an undefined state (may contain junk) before you (or the\nC code you pass it to) fills it with good values. Showing\nthe struct view left by this word to clients may expose your\nprogram to a whole class of security vulnerabilities.\n\n```\n[ x i32 y i32 ] ffi:createLayout $: point\n\npoint ffi:allocateStruct& $: point&\npoint& #x 123 entry:submit\npoint& #y 456 entry:submit\npoint& toQuote leaves: '&⟨x=123_i32, y=456_i32⟩'\n```"
+    },
+    "ffi:buildStruct&": {
+      "name": "ffi:buildStruct&",
+      "desc": "( Eb Slf -- Srv ): allocates and fills Struct reference\n view with entries by asking Entry block for them.\n\nIf Entry block is missing an entry matching a field that\nStruct layout form declares, and that field is of type\n`pointer` or struct reference (`&`), `none` (C nullptr)\nis used as the value. Dies if Entry block is missing\nmatching entry or entries for fields of other types.\n\n```\n[ x i32 y i32 ] ffi:createLayout $: point\n\n100 $: x\n200 $: y\n\n\"Note: `this` has entries called `x` and `y`. `point` has\n fields called `x` and `y`. A match!\"\nthis point ffi:buildStruct& $: point&\n\npoint& toQuote leaves: '&⟨x=100_i32, y=200_i32⟩'\n```"
+    },
+    "ffi:asStruct&": {
+      "name": "ffi:asStruct&",
+      "desc": "( A Slf -- Srv ): creates and leaves Struct reference view\n for the given Address, according to Struct layout form.\n\nThis word is **unsafe**: it does not check whether Address\npoints at something that is layed out according to Struct\nlayout form. Passing 0 (none aka null pointer) for Address\nwill lead to segfault. Passing Address that is outside of\nyour program's memory will lead to segfault. Passing Address\nthat *is* in the bounds of your program's memory, but one\nnot pointing at a struct in accordance with Struct layout\nform, will lead to undefined behavior (most likely junk\nvalues in Struct reference view).\n\n```\n[ x i32 y i32 ] ffi:createLayout $: point\n\n100 $: x\n200 $: y\nthis point ffi:buildStruct& $: point&\n\npoint& ffi:addressof $: addr\n\naddr point ffi:asStruct& $: addrPoint&\naddrPoint&.x leaves: x\naddrPoint&.y leaves: y\naddrPoint& toQuote leaves: '&⟨x=100_i32, y=200_i32⟩'\n```"
+    },
+    "ffi:allocateUnion": {
+      "name": "ffi:allocateUnion",
+      "desc": "( Slf -- Uv ): allocates Union view for the given Struct\n layout form.\n\nThis word is **unsafe**: the resulting Union view is in\nan undefined (uninitialized) state (may be zeroed out,\ncontain junk, or both) before you (or the C code you pass\nit to) fills it with good values. Showing the uninitialized\nunion to clients may expose your program to a whole class\nof security vulnerabilities.\n\n```\n[ chr char\n  ord u8\n] ffi:createLayout $: quux\n\nquux ffi:allocateUnion $: quuxUnion\nquuxUnion #chr 'A' entry:submit\nquuxUnion.ord leaves: 65\n\n\"Union toQuote avoids printing values, because that could\n cause a segfault/overflow in some cases, and would mostly\n output junk anyway.\"\nquuxUnion toQuote leaves: '(⋃ ⟪chr=char, ord=u8⟫)'\n```"
+    },
+    "ffi:buildUnion": {
+      "name": "ffi:buildUnion",
+      "desc": "( Eb Slf -- Uv ): allocates and fills Union view with an\n entry by asking Entry block for any *one* entry out of\n those specified in Struct layout form, in the order they\n are specified in Struct layout form. If the union is no\n longer in use, it is freed by the GC automatically.\n\nEntry block must have at least one of the Struct layout\nform's fields defined. Otherwise, this word dies.\n\n```\n[ chr char\n  ord u8\n] ffi:createLayout $: quux\n\n[ 'A' $: chr\n  this quux ffi:buildUnion\n] val $: unionByChr\n\n[ 66 $: ord\n  this quux ffi:buildUnion\n] val $: unionByOrd\n\n[ 'A' $: chr\n  123 $: ord\n  this quux ffi:buildUnion\n] val $: unionBoth\n\nunionByChr.ord leaves: 65\nunionByOrd.chr leaves: 'B'\n\n\"'chr' is defined first, therefore, it is used rather\n than 'ord'\"\nunionBoth.chr leaves: 'A'\nunionBoth.ord leaves: 65\n```"
+    },
+    "ffi:asUnion": {
+      "name": "ffi:asUnion",
+      "desc": "( A Slf -- Uv ): creates and leaves a Union view for the\n given Address, according to Struct layout form.\n\nThis word is **unsafe**: it does not check whether Address\npoints at something that is layed out according to Struct\nlayout form. Passing 0 (none aka null pointer) for Address\nwill lead to segfault. Passing Address that points outside\nof your program's memory will lead to segfault. Passing\nAddress that *is* in the bounds of your program's memory,\nbut one not pointing at a union in accordance with Struct\nlayout form, will lead to undefined behavior (most likely\njunk values in Union view). Showing ill-formed results of\nthis word to clients may expose your program to a whole\nclass of security vulnerabilities.\n\n```\n[ chr char\n  ord u8\n] ffi:createLayout $: quux\n\n'A' $: chr\n\nthis quux ffi:buildUnion $: quuxUnion\n\nquuxUnion ffi:addressof $: addr\n\naddr quux ffi:asUnion $: addrUnion\naddrUnion.chr leaves: 'A'\naddrUnion.ord leaves: 65\n```"
+    },
+    "ffi:hole": {
+      "name": "ffi:hole",
+      "desc": "( T/Oh -- H ): allocates garbage-collected memory for Hole\n that will hold a value of the given Type. If Other hole\n is passed, wraps that Other hole instead (this could be\n useful in C situations like `int**`)\n\nHoles are (just a bit) safer way of letting C write to a\nmemory location. You first create the hole, then pass it\nto C, then read from the hole by opening it.\n\nNote: this word is **unsafe**: since we cannot check whether\nthe hole was written to, reading from hole (opening it) before\nwriting to it will result in undefined behavior.\n\n```\n\"\"\"\nvoid outputCInt(int* x)\n{\n  *x = 123;\n}\n\"\"\"\n\n#i32 ffi:hole $: intBox\n\nintBox outputCInt\nintBox open leaves: 123\n```"
+    },
+    "ffi:box": {
+      "name": "ffi:box",
+      "desc": "( F T -- A ): allocates garbage-collected memory for Type, and\n writes Form there. Form must be of (or convertible to) Type;\n otherwise, this word dies. Leaves Address of the beginning of\n the allocated memory.\n\n```\n123 #i32 ffi:box $: ptr\nptr #i32 ffi:unbox leaves: 123\n```"
+    },
+    "ffi:unbox": {
+      "name": "ffi:unbox",
+      "desc": "( A T -- F ): interprets whatever Address points at as a\n value of the given Type, and leaves the matching Form.\n Inverse of `ffi:box`.\n\nThis word is **unsafe**: it does not check whether Address\npoints at something that is of the given Type. Passing 0\n(none aka null pointer) for Address will lead to segfault.\nPassing Address that points outside of your program's memory\nwill lead to segfault. Passing Address that *is* in the bounds\nof your program's memory, but one not pointing at a value of\nthe given Type, will lead to undefined behavior (most likely\njunk value of Form). Showing ill-formed results of this word to\nclients, or letting clients control Address or Type, may expose\nyour program to a whole class of security vulnerabilities.\n\n```\n123 #i32 ffi:box $: ptr\nptr #i32 ffi:unbox leaves: 123\n```"
+    },
+    "ffi:unsafeWrite": {
+      "name": "ffi:unsafeWrite",
+      "desc": "( A F T -- ): interprets Form as that of the given Type,\n and writes it at Address.\n\nThis word is **unsafe**: it does not check whether Address\ncan be written to, whether there is enough memory to fully\nwrite Form, etc. Passing 0 (none aka null pointer) for Address\nwill lead to segfault. Passing Address that points outside\nof your program's memory will lead to segfault. Passing Address\nthat *is* in the bounds of your program's memory and can\nbe written to may lead to undefined behavior.\n\n```\n#i32 ffi:hole $: myHole\nmyHole ffi:addressof $: holeAddr\nholeAddr 123 #i32 ffi:unsafeWrite\nmyHole open leaves: 123\n```"
+    },
+    "ffi:viewLayout": {
+      "name": "ffi:viewLayout",
+      "desc": "( Svf -- Slf ): leaves Struct layout form for the given\n Struct view form (an inline struct view, struct reference\n view, or union view).\n\n```\n[ x f32 y f32 ] ffi:createLayout $: point\n\npoint ffi:allocateStruct& $: point&\npoint ffi:allocateStruct~ $: point~\npoint ffi:allocateUnion $: pointU\n\npoint& ffi:viewLayout leaves: point\npoint~ ffi:viewLayout leaves: point\npointU ffi:viewLayout leaves: point\n```"
+    },
+    "ffi:sizeof": {
+      "name": "ffi:sizeof",
+      "desc": "( T -- B ): leaves the size of Type, in Bytes.\n\n```\n#u8  ffi:sizeof leaves: 1\n#u16 ffi:sizeof leaves: 2\n#u32 ffi:sizeof leaves: 4\n#u64 ffi:sizeof leaves: 8\n```"
+    },
+    "ffi:addressof": {
+      "name": "ffi:addressof",
+      "desc": "( Svf/H -- A ): leaves Address of the given Struct view form\n (an inline struct view, struct reference view, or union view),\n or Hole in memory.\n\n```\n#i32 ffi:hole $: myHole\nmyHole ffi:addressof $: holeAddr\nholeAddr 123 #i32 ffi:unsafeWrite\nmyHole open leaves: 123\n```"
     }
   }
 }
