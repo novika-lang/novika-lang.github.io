@@ -20,9 +20,9 @@
       "name": "2die",
       "desc": "( Qm F -- ): enquotes Form, stitches it to the end of\n Quote message, and dies with the resulting quote set as\n the death message.\n\n```\n'expected foobar, got: ' 100 2die \"Sorry: expected foobar, got: 100.\"\n```\n\n"
     },
-    "needsFeature:": {
-      "name": "needsFeature:",
-      "desc": "( needsFeature: I -- ): ensures that the frontend has\nenabled the feature with the specified Id. Dies if such\na feature isn't enabled, or if Id isn't a feature at all."
+    "needsCapability:": {
+      "name": "needsCapability:",
+      "desc": "( needsCapability: I -- ): ensures that the frontend has enabled\nthe capability with the specified Id. Dies if such a capability\nisn't enabled, or if Id isn't a capability id at all."
     },
     "withColorEcho": {
       "name": "withColorEcho",
@@ -148,25 +148,13 @@
       "name": "times:",
       "desc": "( C times: B -- ): infix version of `times`."
     },
-    "PI": {
-      "name": "PI",
-      "desc": "decimal number 3.14159265358979323846"
+    "compiledTimes": {
+      "name": "compiledTimes",
+      "desc": "( N B -- ): **unsafe** `times` alternative for when you\n *really* need to iterate a lot.\n\nThis word basically strips off all steps in the `createDetachedLoop`\n(aka structured control flow) abstraction ladder.\n\nInternally, it's a bit like your Block being followed by a GOTO\nback to the beginning, plus a counter *on the stack*.\n\nNote that the loop is *compiled* from a template when you use\nthis word. **This means that opening this word multiple times\nin a row is inefficient**, as such compilation is expensive.\nHowever, if you need to *iterate* quickly, you can try using\nthis word.\n\nThe stack your Block is given is *not* owned by you. You must\nnot leave junk, and you must not drop the index. The effect\nof your block **must** be `( I -- I )`.\n\n`next` and `break` are **not** supported.\n\n"
     },
-    "TAU": {
-      "name": "TAU",
-      "desc": "decimal number 6.283185307179586476925"
-    },
-    "PI/180": {
-      "name": "PI/180",
-      "desc": "decimal number 0.017453292519943295769222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"
-    },
-    "180/PI": {
-      "name": "180/PI",
-      "desc": "decimal number 57.2957795130823208768463643441910977570529919254828590874086289568418546076208025168496771016363559802"
-    },
-    "EPSILON": {
-      "name": "EPSILON",
-      "desc": "decimal number 0.001"
+    "compiledTimes:": {
+      "name": "compiledTimes:",
+      "desc": "( N compiledTimes: B -- ): infix version of `compiledTimes`.\n\n```\n0 $: acc\n100000 compiledTimes: [ \"( I -- I )\"\n  dup acc + =: acc\n]\nacc echo \"STDOUT: 5000050000⏎\"\n```\n\n"
     },
     "2asc": {
       "name": "2asc",
@@ -482,7 +470,7 @@
     },
     "peek?": {
       "name": "peek?",
-      "desc": "( [ ... | F ... ]B -- F S / S ): leaves Form and/or\n Status boolean for whether Form exists in Block.\n\n```\n[ 1 2 3 ] 1 |to \"[ 1 | 2 3 ]\" peek? leaves: [ 2 true ]\n[ 1 2 3 ] \"[ 1 2 3 | ]\" peek? leaves: [ false ]\n```\n\n"
+      "desc": "( [ ... | F ... ]B -- F true / false ): leaves Form and/\n or a boolean for whether Form exists in Block.\n\n```\n[ 1 2 3 ] 1 |to \"[ 1 | 2 3 ]\" peek? leaves: [ 2 true ]\n[ 1 2 3 ] \"[ 1 2 3 | ]\" peek? leaves: [ false ]\n```\n\n"
     },
     "|-": {
       "name": "|-",
@@ -491,6 +479,10 @@
     "|+": {
       "name": "|+",
       "desc": "( B N -- ): increments block cursor position: moves\n cursor forward N times in Block.\n\n```\n[ 1 2 3 ] $: block\nblock 1 |to\nblock toQuote leaves: '[ 1 | 2 3 ]'\nblock 1 |+\nblock toQuote leaves: '[ 1 2 | 3 ]'\nblock 1 |+\nblock toQuote leaves: '[ 1 2 3 ]'\n```\n\n"
+    },
+    "|:": {
+      "name": "|:",
+      "desc": "( S |: F -- S ): infix version of `there`.\n\nLike `there`, preserves `ahead`. Leaves the opener\nblock dirty due to this.\n\n```\n([ 1 2 3 ] |: 100) leaves: [ 1 2 3 100 ]\n([ 1 2 3 ] |: +) leaves: [ [ 1 5 ] ]\n([ 1 2 3 ] |: swap) leaves: [ [ 1 3 2 ] ]\n\n[ 100 ] |: [ ahead thru + ] 200 123 leaves: [ 300 123 ]\n```\n\n"
     },
     "|clamp": {
       "name": "|clamp",
@@ -680,6 +672,10 @@
       "name": "all?",
       "desc": "( Lb B -- true/false ): whether Block leaves true for all\n items in List block, when opened with each item on top of\n an empty stack.\n\n```\n[ ] [ 100 < ] all? leaves: true \"BEWARE!\"\n[ 1 2 3 ] [ 100 < ] all? leaves: true\n[ 101 2 3 4 ] [ 100 < ] all?\n  leaves: false \"(i.e., because of 101)\"\n```\n\n"
     },
+    "all:": {
+      "name": "all:",
+      "desc": "( Lb all: B -- true/false ):  infix version of `all?`\n\n```\n[ ] all: even? leaves: true \"BEWARE!\"\n[ 1 2 3 ] all: even? leaves: false\n```\n\n"
+    },
     "any?": {
       "name": "any?",
       "desc": "( Lb B -- true/false ): whether Block leaves true for any\n item in List block, when opened with each item on top of an\n empty stack.\n\n```\n[ ] [ 100 < ] any? leaves: false \"BEWARE!\"\n[ 1 2 3 ] [ 3 = ] any? leaves: true\n[ 101 3 2000 ] [ 100 < ] any? leaves: true\n[ 1002 350 2000 ] [ 100 < ] any? leaves: false\n```\n\n"
@@ -690,11 +686,15 @@
     },
     "zip": {
       "name": "zip",
-      "desc": "( A B -- Z ): leaves Zip block A, B. Dies if there is a\n different amount of items in A and B.\n\n```\n[ ] [ ] zip leaves: [ [ ] ]\n[ 1 2 ] [ 3 4 ] zip leaves: [ [ [ 1 3 ] [ 2 4 ] ] ]\n```\n\n"
+      "desc": "( A B -- Z ): leaves Zipped A, B. Dies if there is a\n different amount of items in A and B.\n\n```\n[ ] [ ] zip leaves: [ [ ] ]\n[ 1 2 ] [ 3 4 ] zip leaves: [ [ [ 1 3 ] [ 2 4 ] ] ]\n```\n\n"
     },
     "zipWithDefault": {
       "name": "zipWithDefault",
-      "desc": "( A B D -- Zb ): leaves Zip block A, B with holes\n filled by the given Default form.\n\n```\n[ ] [ ] #hole zipWithDefault leaves: [ [ ] ]\n\n[ 1 2 ] [ 3 4 ] #hole zipWithDefault\n  leaves: [ [ [ 1 3 ] [ 2 4 ] ] ]\n\n[ 1 2 ] [ 3 ] #hole zipWithDefault\n  leaves: [ [ [ 1 3 ] [ 2 hole ] ] ]\n\n[ 1 ] [ 3 4 ] #hole zipWithDefault\n  leaves: [ [ [ 1 3 ] [ hole 4 ] ] ]\n\n"
+      "desc": "( A B D -- Zb ): leaves Zipped A, B with holes\n filled by the given Default form.\n\n```\n[ ] [ ] #hole zipWithDefault leaves: [ [ ] ]\n\n[ 1 2 ] [ 3 4 ] #hole zipWithDefault\n  leaves: [ [ [ 1 3 ] [ 2 4 ] ] ]\n\n[ 1 2 ] [ 3 ] #hole zipWithDefault\n  leaves: [ [ [ 1 3 ] [ 2 hole ] ] ]\n\n[ 1 ] [ 3 4 ] #hole zipWithDefault\n  leaves: [ [ [ 1 3 ] [ hole 4 ] ] ]\n\n"
+    },
+    "zip:": {
+      "name": "zip:",
+      "desc": "( A zip: B -- Z | A zip: B withDefault: D -- Z ): combined\n infix for `zip` and `zipWithDefault`.\n\n```\n[ 1 2 ] zip: [ 3 4 ] leaves: [ [ [ 1 3 ] [ 2 4 ] ] ]\n[ 1 2 ] zip: [ x y ] leaves: [ [ [ 1 x ] [ 2 y ] ] ]\n[ a b ] zip: [ 'Hi!' ] withDefault: 0 leaves: [ [ [ a 'Hi!' ] [ b 0 ] ] ]\n```\n\n"
     },
     "conjure": {
       "name": "conjure",
@@ -760,6 +760,14 @@
       "name": "collect:",
       "desc": "( N collect: B -- Lb ): infix version of `collect`."
     },
+    "compiledCollect": {
+      "name": "compiledCollect",
+      "desc": "( N B -- Lb ): same as `collect`, but powered by `compiledTimes`\n under the hood. Faster than `collect` for large N, but slower if\n opened a lot of times in a row.\n\nPlease read `compiledTimes` to understand why have the whole\ndeal with *unsafe* and *fast*.\n\nDoes **not** support `break` and `next`.\n\n"
+    },
+    "compiledCollect:": {
+      "name": "compiledCollect:",
+      "desc": "( N compiledCollect: B -- Lb ): infix version of `compiledCollect`."
+    },
     "groupBy": {
       "name": "groupBy",
       "desc": "( B Gb -- Gl ): groups forms in Block according to\n Grouper block. Leaves a Group list. Grouper block is\n opened with consequent items on top of an empty stack.\n Grouper block can leave any form except block. Order of\n groups in Group list is the same as in Block, i.e., if\n the first item in Block is is in group G1, then the first\n group in Group list will be G1.\n\nIf necessary, the form Grouper block leaves for a particular\ngroup can be accessed with `.id` on each group block in\nGroup list.\n\nNote though, that Group members do not have access to\ntheir Grouper block's `id`.\n\n```\n[ 1 2 3 ] [ 1 > ] groupBy leaves: [ [ [ 1 ] [ 2 3 ] ] ]\n[ 1 2 3 ] [ 1 <= ] groupBy leaves: [ [ [ 1 ] [ 2 3 ] ] ]\n\n[ 1 2 3 ] [ 1 <= ] groupBy [ .id ] map\n  leaves: [ [ true false ] ] \"The two groups, true and false.\"\n\n[ 1 2 3 ] [ 1 <= 'foo' 'bar' sel ] groupBy [ dup .id 2enclose ] map\n  leaves: [ [ [ [ 1 ] 'foo' ] [ [ 2 3 ] 'bar' ] ] ]\n```\n\n"
@@ -778,7 +786,7 @@
     },
     "from:": {
       "name": "from:",
-      "desc": "a block"
+      "desc": "( B from: Bi to: Ei -- Bs ): takes a slice of Block, starting\n at Begin index, and ending at End index. Both ends are inclusive.\n Leaves the resulting Block slice.\n\nBlock slice is an orphan. Both ends are clamped to Block bounds.\n\n```\n[ ] from: 0 to: 0 leaves: [ [ ] ]\n[ 1 2 3 4 ] from: 1 to: 2 leaves: [ [ 2 3 ] ]\n[ 1 2 3 4 ] from: 0 to: 200 leaves: [ [ 1 2 3 4 ] ]\n[ 1 2 3 4 ] from: 100 to: 200 leaves: [ [ ] ]\n```\n\n"
     },
     "join": {
       "name": "join",
@@ -812,53 +820,53 @@
       "name": "hasDesc?",
       "desc": "( B -- true/false ): leaves whether Block has a description."
     },
-    "|after?": {
-      "name": "|after?",
-      "desc": "( Lb C -- Sfb true/false ): slides right (see\n `|slideRight`) through List block, executes Condition\n block for each form under cursor. Stops *|after* form if\n Condition block left true for it. Leaves Skipped forms\n block. Leaves true when Condition matched, false when\n reached the end of List block without a match.\n\nNote: if Condition is not a block, it is wrapped like so:\n`[ C = ]`.\n\nUseful for writing parsers for Novika DSLs.\n\n```\n[ 1 2 3 4 5 6 ] $: a\na 1 |to\na toQuote leaves: '[ 1 | 2 3 4 5 6 ]''\n\n[ 4 = ] |after? leaves: [ [ 2 3 ] true ]\n\na echo\n\"STDOUT: [ 1 2 3 4 | 5 6 ]⏎\"\n```\n\n"
+    "|afterOrToEnd?": {
+      "name": "|afterOrToEnd?",
+      "desc": "( Lb C -- Sfb true/false ): slides right (see `|slideRight`)\n through List block, executes Condition block for each form under\n the cursor. Stops *after* form if Condition block left true for it.\n Leaves Skipped forms block. Leaves true when Condition matched,\n false when reached the end of List block without a match.\n\nNote: if Condition is not a block, it is wrapped like so:\n`[ C = ]`.\n\nUseful for writing parsers for Novika DSLs.\n\n```\n[ 1 2 3 4 5 6 ] $: a\na 1 |to\na toQuote leaves: '[ 1 | 2 3 4 5 6 ]''\n\n[ 4 = ] |afterOrToEnd? leaves: [ [ 2 3 ] true ]\n\na echo\n\"STDOUT: [ 1 2 3 4 | 5 6 ]⏎\"\n```\n\n"
     },
-    "|after": {
-      "name": "|after",
-      "desc": "( Lb C -- Sfb ): same as `|after?`, but disregards\nwhether the end was reached instead of Condition\nmatching."
+    "|afterOrToEnd?:": {
+      "name": "|afterOrToEnd?:",
+      "desc": "( Lb |afterOrToEnd?: C -- Sfb ): infix version of `|afterOrToEnd?`."
     },
-    "|after!": {
-      "name": "|after!",
-      "desc": "( Lb C -- Sfb ): same as `|after?`, but dies when reached\n end of List block without matching.\n\nWhen Condition is a block, its desc, if available, is\ndisplayed as the thing that was expected. Otherwise,\nCondition itself is displayed.\n\n```\n[ 1 2 3 4 5 6 ] $: a\na 1 |to\na toQuote leaves: '[ 1 | 2 3 4 5 6 ]''\n\na 4 |after! leaves: [ [ 2 3 ] ]\na echo\n\"STDOUT: [ 1 2 3 4 | 5 6 ]⏎\"\n```\n\n"
+    "|afterOrToEnd": {
+      "name": "|afterOrToEnd",
+      "desc": "( Lb C -- Sfb ): same as `|afterOrToEnd?`, but disregards\nwhether the end was reached instead of Condition matching."
     },
-    "|after?:": {
-      "name": "|after?:",
-      "desc": "( Lb |after?: C -- Sfb ): infix version of `|after?`."
+    "|afterOrToEnd:": {
+      "name": "|afterOrToEnd:",
+      "desc": "( Lb |afterOrToEnd: C -- Sfb ): infix version of `|afterOrToEnd`."
     },
-    "|after:": {
-      "name": "|after:",
-      "desc": "( Lb |after: C -- Sfb ): infix version of `|after`."
+    "|afterOrDie": {
+      "name": "|afterOrDie",
+      "desc": "( Lb C -- Sfb ): same as `|afterOrToEnd?`, but dies when reached\n end of List block without matching.\n\nWhen Condition is a block, its desc, if available, is\ndisplayed as the thing that was expected. Otherwise,\nCondition itself is displayed.\n\n```\n[ 1 2 3 4 5 6 ] $: a\na 1 |to\na toQuote leaves: '[ 1 | 2 3 4 5 6 ]''\n\na 4 |afterOrDie leaves: [ [ 2 3 ] ]\na echo\n\"STDOUT: [ 1 2 3 4 | 5 6 ]⏎\"\n```\n\n"
     },
-    "|after!:": {
-      "name": "|after!:",
-      "desc": "( Lb |after!: C -- Sfb ): infix version of `|after!`."
+    "|afterOrDie:": {
+      "name": "|afterOrDie:",
+      "desc": "( Lb |afterOrDie: C -- Sfb ): infix version of `|afterOrDie`."
     },
-    "|before?": {
-      "name": "|before?",
-      "desc": "( Lb C -- Sfb true/false ): similar to `|after?`, but\n leaves the cursor in List block *before* the matching\n item.\n\n```\n[ 1 2 3 4 5 6 ] $: a\na 1 |to\na toQuote leaves: '[ 1 | 2 3 4 5 6 ]'\n\na 4 |before? leaves: [ [ 2 3 ] ]\na echo\n\"STDOUT: [ 1 2 3 | 4 5 6 ]⏎\"\n```\n\n"
+    "|beforeOrToEnd?": {
+      "name": "|beforeOrToEnd?",
+      "desc": "( Lb C -- Sfb true/false ): similar to `|afterOrToEnd?`, but\n leaves the cursor in List block *before* the matching\n item.\n\n```\n[ 1 2 3 4 5 6 ] $: a\na 1 |to\na toQuote leaves: '[ 1 | 2 3 4 5 6 ]'\n\na 4 |beforeOrToEnd leaves: [ [ 2 3 ] ]\na echo\n\"STDOUT: [ 1 2 3 | 4 5 6 ]⏎\"\n```\n\n"
     },
-    "|before": {
-      "name": "|before",
-      "desc": "( Lb C -- Sfb ): same as `|before?`, but disregards\nwhether the end was reached instead of Condition\nmatching."
+    "|beforeOrToEnd?:": {
+      "name": "|beforeOrToEnd?:",
+      "desc": "( Lb |beforeOrToEnd?: C -- Sfb true/false ): infix version of `|beforeOrToEnd?`."
     },
-    "|before!": {
-      "name": "|before!",
-      "desc": "( Lb C -- Sfb ): similar to `|before!`, but leaves the\n cursor in List block *before* the matching item.\n\n```\n[ 1 2 3 4 5 6 ] $: a\na 1 |to\na toQuote leaves: '[ 1 | 2 3 4 5 6 ]'\n\na 4 |before! leaves: [ [ 2 3 ] ]\na echo\n\"STDOUT: [ 1 2 3 | 4 5 6 ]⏎\"\n```\n\n"
+    "|beforeOrToEnd": {
+      "name": "|beforeOrToEnd",
+      "desc": "( Lb C -- Sfb ): same as `|beforeOrToEnd?`, but disregards\nwhether the end was reached instead of Condition\nmatching."
     },
-    "|before?:": {
-      "name": "|before?:",
-      "desc": "( Lb |before?: C -- Sfb ): infix version of `|before?`."
+    "|beforeOrToEnd:": {
+      "name": "|beforeOrToEnd:",
+      "desc": "( Lb |beforeOrToEnd: C -- Sfb ): infix version of `|beforeOrToEnd`."
     },
-    "|before:": {
-      "name": "|before:",
-      "desc": "( Lb |before: C -- Sfb ): infix version of `|before`."
+    "|beforeOrDie": {
+      "name": "|beforeOrDie",
+      "desc": "( Lb C -- Sfb ): similar to `|afterOrDie`, but leaves the\n cursor in List block *before* the matching item.\n\n```\n[ 1 2 3 4 5 6 ] $: a\na 1 |to\na toQuote leaves: '[ 1 | 2 3 4 5 6 ]'\n\na 4 |beforeOrDie leaves: [ [ 2 3 ] ]\na echo\n\"STDOUT: [ 1 2 3 | 4 5 6 ]⏎\"\n```\n\n"
     },
-    "|before!:": {
-      "name": "|before!:",
-      "desc": "( Lb |before!: C -- Sfb ): infix version of `|before!`."
+    "|beforeOrDie:": {
+      "name": "|beforeOrDie:",
+      "desc": "( Lb |beforeOrDie: C -- Sfb ): infix version of `|beforeOrDie`."
     },
     "tally": {
       "name": "tally",
@@ -891,6 +899,14 @@
     "|ring": {
       "name": "|ring",
       "desc": "( B N -- Rb ): leaves a Ring block of N (if possible)\n forms left and right of the cursor in Block. If either\n side contains less forms than N, leaves all forms found\n in it. Puts cursor in Ring block after last form in the\n left-hand side of the ring.\n\nDies if N <= 0 (there are only >zero rings). Dies if Block\nis empty (because it cannot contain >zero rings).\n\nRing block also holds Block index of where the first\nform of the ring is (entry `firstAt`), and where the\nlast form of the ring is (entry `lastAt`).\n\nHere is a diagram which may help you understand what a\nring is:\n\n```text\n┌───────────────────────┐\n│ 3 |ring               │\n│                       │\n│   ┌───────────────┐   │\n│   │ 2 |ring       │   │\n│   │               │   │\n│   │   ┌───────┐   │   │\n│   │   │1 |ring│   │   │\n│   │   │       │   │   │\n│ 1 │ 2 │ 3 | 4 │ 5 │ 6 │\n│   │   │       │   │   │\n│   │   └───────┘   │   │\n│   │               │   │\n│   └───────────────┘   │\n│                       │\n└───────────────────────┘\n```\n\nAnd in code:\n\n```\n[ 1 2 3 \"|\" 4 5 6 ] dup 3 |to $: block\n\nblock 1 |ring toQuote leaves: '[ 3 | 4 · ${firstAt :: 2} ${lastAt :: 3} ]'\nblock 2 |ring toQuote leaves: '[ 2 3 | 4 5 · ${firstAt :: 1} ${lastAt :: 4} ]'\nblock 3 |ring toQuote leaves: '[ 1 2 3 | 4 5 6 · ${firstAt :: 0} ${lastAt :: 5} ]'\nblock 4 |ring toQuote leaves: '[ 1 2 3 | 4 5 6 · ${firstAt :: 0} ${lastAt :: 5} ]'\nblock 100 |ring toQuote leaves: '[ 1 2 3 | 4 5 6 · ${firstAt :: 0} ${lastAt :: 5} ]'\n```\n\n"
+    },
+    "sample": {
+      "name": "sample",
+      "desc": "( B -- Rf ): leaves a Random form from the given Block.\n\n```\n[ 1 2 3 4 ] sample leaves: \"... a random form from the block, let's say 2\"\n```\n\n"
+    },
+    "sample:": {
+      "name": "sample:",
+      "desc": "( B sample: C -- S ): samples the given Block Count times,\n and leaves the resulting block of Samples\n\n```\n[ 1 2 3 4 ] sample: 2 leaves: \"... [ (a random form) (a random form) ]\"\n```\n\n"
     },
     "console:width": {
       "name": "console:width",
@@ -978,15 +994,247 @@
     },
     "${": {
       "name": "${",
-      "desc": "( E... -- ): Same as `$:` but allows to define multiple\n Entries at the same time, and in the 'human-readable' order.\n\n```\n[ ${ x y } this ] @: point\n\n100 200 point -> [ x y ]\n  leaves: [ [ 100 200 ] ]\n```\n\n"
+      "desc": "( E... -- ): same as `$:` but allows to define multiple pusher\n Entries simultaneously, and in the 'human-readable' order.\n\n```\n[ ${ x y } this ] @: point\n\n100 200 point -> [ x y ]\n  leaves: [ [ 100 200 ] ]\n```\n\n"
+    },
+    "@{": {
+      "name": "@{",
+      "desc": "( E... -- ): same as `@:`, but allows to define multiple opener\n Entries simultaneously, and in the 'human-readable' order.\n\n```\n[ @{ x y }\n\n  [ bi*: [x +] [y +] ={ x y } ] @: move\n\n  this\n] @: point\n\n\"Point A has decimals under X and Y\"\n100 200 point $: A\n\n\"Point B is inset some...\"\n[ A.x 10 + ] [ A.y 5 + ] point $: B\n\nA.x A.y leaves: [ 100 200 ]\nB.x B.y leaves: [ 110 205 ]\n\n\"Move A some...\"\n10 10 A.move\n\nA.x A.y leaves: [ 110 210 ]\nB.x B.y leaves: [ 120 215 ]\n```\n\n"
+    },
+    "={": {
+      "name": "={",
+      "desc": "( E... -- ): same as `=:`, but allows to submit multiple Entries\n simultaneously, and in the 'human-readable' order.\n\n```\n[ @{ x y }\n\n  [ ={ x y } ] @: update\n\n  this\n] @: point\n\n0 0 point $: A\n\nA.x A.y leaves: [ 0 0 ]\n\n100 200 A.update\n\nA.x A.y leaves: [ 100 200 ]\n```\n\n"
+    },
+    "sdl:keysym": {
+      "name": "sdl:keysym",
+      "desc": "The SDL keysym structure, used in key events.\n\nIf you are looking for translated character input, see\nthe `sdl:textInputEvent`.\n\n* `scancode`: SDL physical key code (see `sdl:scancode:*`)\n* `keycode`: SDL virtual key code.\n* `mod`: current key modifiers.\n\n"
+    },
+    "sdl:commonEvent": {
+      "name": "sdl:commonEvent",
+      "desc": "Fields shared by every event.\n\n* `timestamp`: in milliseconds, populated using `sdl:ticks`.\n\n"
+    },
+    "sdl:displayEvent": {
+      "name": "sdl:displayEvent",
+      "desc": "Display state change event.\n\n* `timestamp`: in milliseconds, populated using `sdl:ticks`.\n* `display`: the associated display index.\n* `event`: one of `sdl:displayEvent:*`.\n* `data1`: event dependent data.\n\n"
+    },
+    "sdl:windowEvent": {
+      "name": "sdl:windowEvent",
+      "desc": "Window state change event.\n\n* `timestamp`: in milliseconds, populated using `sdl:ticks`.\n* `windowID`: the associated window.\n* `event`: one of `sdl:windowEvent:*`.\n* `data1`: event dependent data.\n* `data2`: event dependent data.\n\n"
+    },
+    "sdl:keyboardEvent": {
+      "name": "sdl:keyboardEvent",
+      "desc": "Keyboard button event.\n\n* `timestamp`: in milliseconds, populated using `sdl:ticks`.\n* `windowID`: The window with keyboard focus, if any.\n* `state`: `sdl:pressedState` or `sdl:releasedState`\n* `repeat`: non-zero if this is a key repeat\n* `event`: one of `sdl:windowEvent:*`.\n* `keysym`: the key that was pressed or released, see `sdl:keysym`.\n\n"
+    },
+    "sdl:textEditingEvent": {
+      "name": "sdl:textEditingEvent",
+      "desc": "Keyboard text editing event.\n\n* `timestamp`: in milliseconds, populated using `sdl:ticks`.\n* `windowID`: The window with keyboard focus, if any.\n* `text`: points to 32 `u8`s of the the editing text.\n* `start`: the start cursor of selected editing text.\n* `length`: the length of selected editing text.\n\n"
+    },
+    "sdl:textEditingEvent*": {
+      "name": "sdl:textEditingEvent*",
+      "desc": "Extended keyboard text editing event when text would be\n truncated if stored in the text buffer `sdl:textEditingEvent`.\n\n* `timestamp`: in milliseconds, populated using `sdl:ticks`.\n* `windowID`: The window with keyboard focus, if any.\n* `text`: the editing text, which should be freed with `sdl:free`,\n  and will not be NULL.\n* `start`: the start cursor of selected editing text.\n* `length`: the length of selected editing text.\n\n"
+    },
+    "sdl:textInputEvent": {
+      "name": "sdl:textInputEvent",
+      "desc": "Keyboard text input event.\n\n* `timestamp`: in milliseconds, populated using `sdl:ticks`.\n* `windowID`: The window with keyboard focus, if any.\n* `text`: points to 32 `u8`s of the the editing text.\n\n"
+    },
+    "sdl:mouseMotionEvent": {
+      "name": "sdl:mouseMotionEvent",
+      "desc": "Mouse motion event.\n\n* `timestamp`: in milliseconds, populated using `sdl:ticks`.\n* `windowID`: The window with mouse focus, if any.\n* `which`: the mouse instance id, or `sdl:touchMouseId`\n* `state`: the current button state (`sdl:pressedState` or `sdl:releasedState`).\n* `x`: X coordinate, relative to window.\n* `y`: Y coordinate, relative to window.\n* `xrel`: The relative motion in the X direction.\n* `yrel`: The relative motion in the Y direction.\n\n"
+    },
+    "sdl:mouseButtonEvent": {
+      "name": "sdl:mouseButtonEvent",
+      "desc": "Mouse button event.\n\n* `timestamp`: in milliseconds, populated using `sdl:ticks`.\n* `windowID`: The window with mouse focus, if any.\n* `which`: the mouse instance id, or `sdl:touchMouseId`.\n* `button`: the mouse button index.\n* `state`: the current button state (`sdl:pressedState` or `sdl:releasedState`).\n* `clicks`: 1 for single-click, 2 for double-click, etc.\n* `x`: X coordinate, relative to window.\n* `y`: Y coordinate, relative to window.\n\n"
+    },
+    "sdl:mouseWheelEvent": {
+      "name": "sdl:mouseWheelEvent",
+      "desc": "Mouse wheel event structure.\n\n* `timestamp`: in milliseconds, populated using `sdl:ticks`.\n* `windowID`: The window with mouse focus, if any.\n* `which`: the mouse instance id, or `sdl:touchMouseId`.\n* `x`: the amount scrolled horizontally, positive to the right\n  and negative to the left.\n* `y`: the amount scrolled vertically, positive away from the\n  user and negative toward the user.\n* `direction`: set to one of `sdl:mouseWheel:*`. When\n  `sdl:mouseWheel:flipped`, the values in X and Y will be\n  opposite. Multiply by -1 to change them back.\n* `preciseX`: the amount scrolled horizontally, positive to the\n  right and negative to the left, with float precision.\n* `preciseY`: The amount scrolled vertically, positive away from\n  the user and negative toward the user, with float precision.\n* `mouseX`: X coordinate, relative to window.\n* `mouseY`: Y coordinate, relative to window.\n\n"
+    },
+    "sdl:dropEvent": {
+      "name": "sdl:dropEvent",
+      "desc": "An event used to request a file open by the system.\n This event is enabled by default, you can disable it\n with `sdl:eventState`.\n\n* `timestamp`: in milliseconds, populated using `sdl:ticks`.\n* `file`: points to the file name, which should be freed with\n  `sdl:free`. Is NULL on begin/complete.\n* `windowID`: the window that was dropped on, if any.\n\n"
+    },
+    "sdl:quitEvent": {
+      "name": "sdl:quitEvent",
+      "desc": "The \"quit requested\" event.\n\n* `timestamp`: in milliseconds, populated using `sdl:ticks`.\n\n"
+    },
+    "sdl:event": {
+      "name": "sdl:event",
+      "desc": "General event structure.\n\n* `type`: event type, shared with all events.\n\nThe following is a list of event types/fields that are implemented.\nThose that are simply `pointer`s are unimplemented.\n\n* `common`: common event data (see `sdl:commonEvent`).\n* `display`: display event data (see `sdl:displayEvent`).\n* `window`: window event data (see `sdl:windowEvent`).\n* `key`: keyboard event data (see `sdl:keyboardEvent`).\n* `edit`: text editing event data (see `sdl:textEditingEvent`).\n* `edit*`: extended text editing event data (see `sdl:textEditingEvent*`).\n* `text`: text input event data (see `sdl:textInputEvent`).\n* `motion`: mouse motion event data (see `sdl:mouseMotionEvent`).\n* `button`: mouse button event data (see `sdl:mouseButtonEvent`).\n* `wheel`: mouse wheel event data (see `sdl:mouseWheelEvent`).\n* `quit`: quit request event data (see `sdl:quitEvent`).\n* `drop`: drag and drop event data (see `sdl:dropEvent`).\n\n"
+    },
+    "sdl:intPoint": {
+      "name": "sdl:intPoint",
+      "desc": "The structure that defines a point (integer).\n\n* `x`: the X coordinate of the point.\n* `y`: the Y coordinate of the point.\n\n"
+    },
+    "sdl:floatPoint": {
+      "name": "sdl:floatPoint",
+      "desc": "The structure that defines a point (floating point).\n\n* `x`: the X coordinate of the point.\n* `y`: the Y coordinate of the point.\n\n"
+    },
+    "sdl:intRect": {
+      "name": "sdl:intRect",
+      "desc": "A rectangle, with the origin at the upper left (integer).\n\n* `x`: the X coordinate of the rectangle.\n* `y`: the Y coordinate of the rectangle.\n* `w`: width of the rectangle.\n* `h`: height of the rectangle.\n\n"
+    },
+    "sdl:floatRect": {
+      "name": "sdl:floatRect",
+      "desc": "A rectangle, with the origin at the upper left (floating point).\n\n* `x`: the X coordinate of the rectangle.\n* `y`: the Y coordinate of the rectangle.\n* `w`: width of the rectangle.\n* `h`: height of the rectangle.\n\n"
+    },
+    "sdl:intRectsIntersect?": {
+      "name": "sdl:intRectsIntersect?",
+      "desc": "( R1 R2 -- 0/1 ): leaves whether the two integer Rectangles\nintersect. If either is null will leave 0.\n\n"
+    },
+    "sdl:floatRectsIntersect?": {
+      "name": "sdl:floatRectsIntersect?",
+      "desc": "( R1 R2 -- 0/1 ): leaves whether the two floating point\nRectangles intersect. If either is null will leave 0.\n\n"
+    },
+    "sdl:writeIntRectIntersection?": {
+      "name": "sdl:writeIntRectIntersection?",
+      "desc": "( R1 R2 Rh -- 0/1 ): calculate the intersection of two integer\nRectangles and writes it into Result hole.\n\n"
+    },
+    "sdl:writeFloatRectIntersection?": {
+      "name": "sdl:writeFloatRectIntersection?",
+      "desc": "( R1 R2 Rh -- 0/1 ): calculate the intersection of two floating\npoint Rectangles and writes it into Result hole.\n\n"
+    },
+    "sdl:writeIntRectUnion?": {
+      "name": "sdl:writeIntRectUnion?",
+      "desc": "( R1 R2 Rh -- 0/1 ): calculate the union of two integer Rectangles\nand writes it into Result hole.\n\n"
+    },
+    "sdl:writeFloatRectUnion?": {
+      "name": "sdl:writeFloatRectUnion?",
+      "desc": "( R1 R2 Rh -- 0/1 ): calculate the union of two floating point\nRectangles and write it into Result hole.\n\n"
+    },
+    "sdl:color": {
+      "name": "sdl:color",
+      "desc": "Represents a color.\n\n* `r`: the red component in the range 0-255.\n* `g`: the green component in the range 0-255.\n* `b`: the blue component in the range 0-255.\n* `a`: the alpha component in the range 0-255.\n\n"
+    },
+    "sdl:palette": {
+      "name": "sdl:palette",
+      "desc": "Palette information.\n\n* `ncolors`: the number of colors in the palette.\n* `colors`: an array of `sdl:color`s representing the palette.\n\n"
+    },
+    "sdl:pixelFormat": {
+      "name": "sdl:pixelFormat",
+      "desc": "Pixel format information. Everything is read-only.\n\n* `format`: one of `sdl:pixelFormat:*`\n* `palette`: an `sdl:palette` structure associated with this pixel\n  format, or null if the format doesn't have a palette.\n* `bitsPerPixel`: the number of significant bits in a pixel value,\n  e.g.: 8, 15, 16, 24, 32.\n* `bytesPerPixel`: the number of bytes required to hold a pixel\n  value, e.g.: 1, 2, 3, 4.\n* `rmask`: a mask representing the location of the red component\n   of the pixel.\n* `gmask`: a mask representing the location of the green component\n   of the pixel.\n* `bmask`: a mask representing the location of the blue component\n   of the pixel.\n* `amask`: a mask representing the location of the alpha component\n   of the pixel or 0 if the pixel format doesn't have any alpha\n   information.\n\n"
+    },
+    "sdl:surface": {
+      "name": "sdl:surface",
+      "desc": "A collection of pixels used in software blitting.\n\n* Read-only `format`: the format of the pixels stored in the\n  surface.  See `sdl:pixelFormat`.\n* Read-only `w`, `h`: the width and height in pixels.\n* Read-only `pitch`: the length of a row of pixels in bytes.\n* Read-write `pixels`: the pointer to the actual pixel data.\n* Read-write `userdata`: an arbitrary pointer you can set.\n* Read-only `clipRect`: an `sdl:intRect` structure used to clip\n  blits to the surface. Can be set by `sdl:setClipRect`.\n\n"
+    },
+    "sdl:init": {
+      "name": "sdl:init",
+      "desc": "( F -- S ): initializes the SDL library given subsystem initialization\nFlags (any of `sdl:init:*` OR'd together). Leaves 0 on success or a negative\nerror code on failure; use `sdl:error` for more information."
+    },
+    "sdl:deinit": {
+      "name": "sdl:deinit",
+      "desc": "( F -- ): shuts down specific SDL subsystems given any of the flags\n used by `sdl:init`.\n\nYou still need to call `sdl:quit` even if you close all open subsystems\nwith `sdl:deinit`.\n\n"
+    },
+    "sdl:createWindow": {
+      "name": "sdl:createWindow",
+      "desc": "( T X Y W H F -- P ): creates a window and leaves a Pointer to it\n (or null if there was an error).\n\nThe window is created with the given Title, at the specified X and Y\ncoordinates (these can also be set to `sdl:window:centered` or\n`sdl:window:positionUndefined`), with the specified Width and Height\n(in screen coordinates), and according to Flags.\n\nSee `sdl:window:*` for Flags.\n\n"
+    },
+    "sdl:createRenderer": {
+      "name": "sdl:createRenderer",
+      "desc": "( Wp I F -- P ): creates a 2D rendering context for a Window pointer\n and leaves a pointer to it (or null if there was an error).\n\nWindow pointer is a pointer to the window where rendering is displayed.\n\nIndex is the index of the rendering driver to initialize, or -1 to\ninitialize the first one supporting the requested flags.\n\nFlags is one or more `sdl:renderer:*` flags OR'd together.\n\n"
+    },
+    "sdl:error": {
+      "name": "sdl:error",
+      "desc": "[foreign function: SDL_GetError]"
+    },
+    "sdl:ticks": {
+      "name": "sdl:ticks",
+      "desc": "[foreign function: SDL_GetTicks]"
+    },
+    "sdl:renderClear": {
+      "name": "sdl:renderClear",
+      "desc": "[foreign function: SDL_RenderClear]"
+    },
+    "sdl:setRenderDrawColor": {
+      "name": "sdl:setRenderDrawColor",
+      "desc": "[foreign function: SDL_SetRenderDrawColor]"
+    },
+    "sdl:fillRect": {
+      "name": "sdl:fillRect",
+      "desc": "[foreign function: SDL_RenderFillRect]"
+    },
+    "sdl:textureFromSurface": {
+      "name": "sdl:textureFromSurface",
+      "desc": "[foreign function: SDL_CreateTextureFromSurface]"
+    },
+    "sdl:destroyTexture": {
+      "name": "sdl:destroyTexture",
+      "desc": "[foreign function: SDL_DestroyTexture]"
+    },
+    "sdl:renderCopy": {
+      "name": "sdl:renderCopy",
+      "desc": "[foreign function: SDL_RenderCopy]"
+    },
+    "sdl:renderPresent": {
+      "name": "sdl:renderPresent",
+      "desc": "[foreign function: SDL_RenderPresent]"
+    },
+    "sdl:pollEvent": {
+      "name": "sdl:pollEvent",
+      "desc": "[foreign function: SDL_PollEvent]"
+    },
+    "sdl:waitEvent": {
+      "name": "sdl:waitEvent",
+      "desc": "[foreign function: SDL_WaitEvent]"
+    },
+    "sdl:freeSurface": {
+      "name": "sdl:freeSurface",
+      "desc": "[foreign function: SDL_FreeSurface]"
+    },
+    "sdl:quit": {
+      "name": "sdl:quit",
+      "desc": "[foreign function: SDL_Quit]"
+    },
+    "sdl:ensure": {
+      "name": "sdl:ensure",
+      "desc": "( S -- ): dies with `sdl:error` if Status is negative.\n\nSome SDL and SDL TTF functions return negative integers\nto signal an error. In this case, this word will die\npreventing the following code to be executed, so you\ndon't have to worry about handling SDl errors.\n\nNote that by dying you may cause some resources to *not*\nbe freed. Keeping track of that is a task for a higher-\nlevel wrapper around these bingings. This word nor any\nword that is part of these bindings won't do anything\nabout it.\n\n"
+    },
+    "sdl:notNull": {
+      "name": "sdl:notNull",
+      "desc": "( P -- ): dies if Pointer is NULL, that is, if Pointer\n is equal to `0`.\n\nNovika uses decimals to represent pointers, which is unsafe\nbut OK for such low-level code. This word allows you to catch\nand die on NULLs rather than handling them explicitly, which\nis a bit more tedious.\n\nNote that by dying you may cause some resources to *not*\nbe freed. Keeping track of that is a task for a higher-\nlevel wrapper around these bingings. This word nor any\nword that is part of these bindings won't do anything\nabout it.\n\n"
+    },
+    "sdl:ttf:init": {
+      "name": "sdl:ttf:init",
+      "desc": "( -- 0/-1 ): initializes the truetype font API.\n\nMust be called before using other functions in this\nlibrary, except `sdl:ttf:init?`. SDL does not have to\nbe initialized before this call.\n\nLeaves 0 if initialization was successful or -1 if an\nerror occured. Use `sdl:error` to get a human-readable\nerror message for this word and for words in this library\nwhich leave 0/-1 to signal an error.\n\n"
+    },
+    "sdl:ttf:quit": {
+      "name": "sdl:ttf:quit",
+      "desc": "( -- ): shuts down and cleans up the truetype font API.\n\nAfter calling this the `sdl:ttf` library functions should\nnot be used, except for `sdl:ttf:init?`. You may, of course,\nuse `sdl:ttf:init` to use the functionality again.\n\n"
+    },
+    "sdl:ttf:open": {
+      "name": "sdl:ttf:open",
+      "desc": "( Fn Ps -- Fp/0 ): loads and leaves Font pointer from the\n provided File name, uses the given Point size. The latter\n basically translates to pixel height.\n\nLeaves NULL (0) on error.\n\n"
+    },
+    "sdl:ttf:close": {
+      "name": "sdl:ttf:close",
+      "desc": "( Fp -- ): free the memory used by font at Foint pointer,\nand free font itself as well. Do not use font after this\nwithout loading a new font to it.\n\n"
+    },
+    "sdl:ttf:putSize": {
+      "name": "sdl:ttf:putSize",
+      "desc": "( Fp Q Wh Hh -- 0/-1 ): calculates the resulting surface\n size of Quote rendered using the font behind Font pointer.\n Width is put into Width hole, and height is put into\n Height hole.\n\nConsider using `sdl:ttf:size` which create and read from the\nholes for you.\n\n"
+    },
+    "sdl:ttf:getSolidSurface": {
+      "name": "sdl:ttf:getSolidSurface",
+      "desc": "( Fp Q Fc -- Sp ): renders Quote painted with Foreground\n`sdl:color` using font behind Font pointer. Leaves Surface\npointer to a new surface containing the rendered quote,\n*which you must free when it becomes unused*.\n\n"
+    },
+    "sdl:ttf:getShadedSurface": {
+      "name": "sdl:ttf:getShadedSurface",
+      "desc": "( Fp Q Fc Bc -- Sp ): renders Quote painted with Foreground\n color (an `sdl:color~`) with background of Background color\n (also an `sdl:color~`), using font behind Font pointer. Leaves\n Surface pointer to a new surface containing the rendered quote,\n *which you must free when it becomes unused*.\n\nSlower but sharper than `sdl:ttf:getSolidSurface`.\n\n"
+    },
+    "sdl:ttf:getBlendedSurface": {
+      "name": "sdl:ttf:getBlendedSurface",
+      "desc": "( Fp Q Fc -- Sp ): renders Quote painted with Foreground\n color (an `sdl:color~`), using font behind Font pointer. Leaves\n Surface pointer to a new surface containing the rendered quote,\n *which you must free when it becomes unused*.\n\nThe sharpest but slowest way to render text. Text is blended\nwith whatever is behind.\n\n"
+    },
+    "sdl:ttf:size": {
+      "name": "sdl:ttf:size",
+      "desc": "( Fp Q -- W H ): calculates and leaves Width and Height of Quote\nrendered using the font behind Font pointer."
     },
     "novika:version": {
       "name": "novika:version",
       "desc": "( -- Vq ): leaves Version of the frontend as a quote."
     },
-    "novika:features": {
-      "name": "novika:features",
-      "desc": "( -- Fb ): lists the ids of features provided by the\n frontend in Feature block.\n\n```\n\"Yours may differ!\"\nnovika:features leaves: [ [ 'essential' 'colors' 'console' ] ]\n```"
+    "novika:capabilities": {
+      "name": "novika:capabilities",
+      "desc": "( -- Lb ): lists the ids of capabilities provided by the\n frontend in List block.\n\n```\n\"Yours may differ!\"\nnovika:capabilities leaves: [ [ 'essential' 'colors' 'console' ] ]\n```"
     },
     "withEchoFg": {
       "name": "withEchoFg",
@@ -1010,11 +1258,11 @@
     },
     "withEmphasisAppendEcho": {
       "name": "withEmphasisAppendEcho",
-      "desc": "( F -- ): same as `withColorAppendEcho`, but also emphasizes\n echo of Form. Bold style is used by default, but feature\n implementors may choose e.g. italic."
+      "desc": "( F -- ): same as `withColorAppendEcho`, but also emphasizes\n echo of Form. Bold style is used by default, but implementors\n may choose e.g. italic."
     },
     "withColorAppendEcho": {
       "name": "withColorAppendEcho",
-      "desc": "( F -- ): appends Form with last color from the echo\n foreground color stack set as foreground color, and\n last color from the echo background stack set as background\n color, to the standard output stream.\n\nNote: some implementations (particularly Novika's default\nimplementation) choose to restrict foreground and background\ncolors to system's basic 16 colors for compatibility &\nportability. If you want more cross-platform control over\ncolors (and pretty much everything else), take a look at\nfeature console."
+      "desc": "( F -- ): appends Form with last color from the echo\n foreground color stack set as foreground color, and\n last color from the echo background stack set as background\n color, to the standard output stream.\n\nNote: some implementations (particularly Novika's default\nimplementation) choose to restrict foreground and background\ncolors to system's basic 16 colors for compatibility &\nportability. If you want more cross-platform control over\ncolors (and pretty much everything else), take a look at\nconsole capability."
     },
     "appendEcho": {
       "name": "appendEcho",
@@ -1026,7 +1274,7 @@
     },
     "reportError": {
       "name": "reportError",
-      "desc": "( Eo -- ): reports about an error to the standard error\n stream, given an Error object.\n\nYou can obtain an error object by, e.g., catching it\nin `*died`."
+      "desc": "( Eo -- ): reports about an error to the standard error\n stream, given an Error object.\n\nYou can obtain an error object by, e.g., catching it\nin `__died__`."
     },
     "monotonic": {
       "name": "monotonic",
@@ -1084,14 +1332,6 @@
       "name": "fromPalette",
       "desc": "( Cf Pb -- Cc ): leaves the Closest color form to Color from\n a Palette block. How close the color is is determined by\n distance: the Closest color is that color in Palette block\n to which Color has least (minimum) distance.\n\n```\n[ 0 0 0 rgb\n  255 0 0 rgb\n  0 255 0 rgb\n  0 0 255 rgb\n  255 255 255 rgb\n] vals $: pal\n\n0 0 0 rgb pal fromPalette toQuote leaves: 'rgb(0, 0, 0)'\n76 175 80 rgb pal fromPalette \"greenish\" toQuote leaves: 'rgb(0, 255, 0)'\n220 237 200 rgb pal fromPalette \"very light green\" toQuote leaves: 'rgb(255, 255, 255)'\n74 20 140 rgb pal fromPalette \"very dark purple\" toQuote leaves: 'rgb(255, 0, 0)'\n```"
     },
-    "#true": {
-      "name": "#true",
-      "desc": "boolean true"
-    },
-    "#false": {
-      "name": "#false",
-      "desc": "boolean false"
-    },
     "prototype": {
       "name": "prototype",
       "desc": "( B -- P ): leaves the Prototype of Block."
@@ -1099,6 +1339,10 @@
     "parent": {
       "name": "parent",
       "desc": "( B -- P ): leaves the Parent of Block."
+    },
+    "address": {
+      "name": "address",
+      "desc": "( B -- A ): leaves pointer Address of Block."
     },
     "conts": {
       "name": "conts",
@@ -1138,15 +1382,15 @@
     },
     "dup": {
       "name": "dup",
-      "desc": "( F -- F F ): duplicates the Form before cursor."
+      "desc": "( F -- F F ): duplicates the Form before cursor.\n\n```\n'hello' dup leaves: [ 'hello' 'hello' ]\n\n[ 1 2 3 ] (dup 2 |to) $: block\nblock toQuote leaves: '[ 1 2 | 3 ]'\nblock [ dup ] hydrate\nblock toQuote leaves: '[ 1 2 2 | 3 ]'\n```"
     },
     "drop": {
       "name": "drop",
-      "desc": "( F -- ): drops the Form before cursor."
+      "desc": "( F -- ): drops the Form before cursor.\n\n```\n'hello' drop leaves: [ ]\n\n[ 1 2 3 ] (dup 2 |to) $: block\nblock toQuote leaves: '[ 1 2 | 3 ]'\nblock [ drop ] hydrate\nblock toQuote leaves: '[ 1 | 3 ]'\n```"
     },
     "swap": {
       "name": "swap",
-      "desc": "( A B -- B A ): swaps two Forms before cursor."
+      "desc": "( A B -- B A ): swaps two Forms before cursor.\n\n```\n1 2 swap leaves: [ 2 1 ]\n\n[ 1 2 3 ] (dup 2 |to) $: block\nblock toQuote leaves: '[ 1 2 | 3 ]'\nblock [ swap ] hydrate\nblock toQuote leaves: '[ 2 1 | 3 ]'\n```"
     },
     "hydrate": {
       "name": "hydrate",
@@ -1182,11 +1426,11 @@
     },
     "same?": {
       "name": "same?",
-      "desc": "( F1 F2 -- true/false ): leaves whether two Forms are the\n same (by reference for block, by value  for any other form)."
+      "desc": "( F1 F2 -- true/false ): leaves whether two Forms are the\n same (by reference for block, by value for any other form).\n\n```\n1 2 same? leaves: false\n1 1 same? leaves: true\n\n'hello' 'hello world' same? leaves: false\n'hello' 'hello' same? leaves: true\n\n\"etc...\"\n\n[ 1 2 + ] $: b1\n[ 1 2 + ] $: b2\n\nb1 b2 same? leaves: false \"They're different blocks, content doesn't matter!\"\n\nb1 b1 same? leaves: true\nb2 b2 same? leaves: true\n```"
     },
     "=": {
       "name": "=",
-      "desc": "( F1 F2 -- true/false ): leaves whether two Forms are equal\n (they may or may not be same forms, i.e., those for which\n `same?` would leave true)."
+      "desc": "( F1 F2 -- true/false ): leaves whether two Forms are equal by\n content (they may or may not be the same forms reference-wise,\n i.e., those for which `same?` would leave true).\n\n```\n1 2 = leaves: false\n1 1 = leaves: true\n\n'hello' 'hello world' = leaves: false\n'hello' 'hello' = leaves: true\n\n\"etc...\"\n\n[ 1 2 + ] $: b1\n[ 1 2 + ] $: b2\n\nb1 b2 = leaves: true \"They're equal by content!\"\n\nb1 b1 = leaves: true\nb2 b2 = leaves: true\n\n\"Supports self-reference:\"\n[ ] $: b3\nb3 b3 shove\nb3 b3 = leaves: true\n(b3 first) b3 = leaves: true\n\"etc...\"\n```"
     },
     "anyof?": {
       "name": "anyof?",
@@ -1194,11 +1438,11 @@
     },
     "uppercase?": {
       "name": "uppercase?",
-      "desc": "( Q -- true/false ): leaves whether Quote consists of only\n uppercase characters. If Quote is empty, leaves false."
+      "desc": "( Q -- true/false ): leaves whether Quote is all-uppercase.\n If Quote is empty, leaves false.\n\n```\n'' uppercase? leaves: false\n'A' uppercase? leaves: true\n'hello' uppercase? leaves: false\n'Hello' uppercase? leaves: false\n'HELLO' uppercase? leaves: true\n'HELLO WORLD' uppercase? leaves: false\n```"
     },
     "toUppercase": {
       "name": "toUppercase",
-      "desc": "( Q -- Uq ): leaves all- Uppercase quote for Quote: converts\n lowercase character(s) in Quote to uppercase. If Quote is empty,\n leaves empty quote."
+      "desc": "( Q -- Uq ): leaves all- Uppercase quote for Quote: converts\n lowercase character(s) in Quote to uppercase. If Quote is empty,\n leaves empty quote.\n\n```\n'' toUppercase leaves: ''\n'hello' toUppercase leaves: 'HELLO'\n'hello world' toUppercase? leaves: 'HELLO WORLD'\n```"
     },
     "block?": {
       "name": "block?",
@@ -1210,7 +1454,7 @@
     },
     "word?": {
       "name": "word?",
-      "desc": "( F -- true/false ): leaves whether Form is a word form,\n or a block that implements '*asWord'.\n\n```\n#foo word? leaves: true\n\n[ #foo $: *asWord this ] open word? leaves: true\n```"
+      "desc": "( F -- true/false ): leaves whether Form is a word form,\n or a block that implements '__word__'.\n\n```\n#foo word? leaves: true\n\n[ #foo $: __word__ this ] open word? leaves: true\n```"
     },
     "private?": {
       "name": "private?",
@@ -1222,39 +1466,39 @@
     },
     "asWord": {
       "name": "asWord",
-      "desc": "( F -- W ): asserts that Form is a Word form, dies if\n it's not.\n\nFor example, the following expression dies:\n\n```\n100 asWord\n```\n\nEt cetera for all other forms, except:\n\n```\n#foo asWord leaves: [ foo ]\n```\n\n`*asWord` hook can make a block usable in place of a word,\nprovided its definition leaves a word or a block which\nimplements '*asWord':\n\n```\n[ $: x x $: *asWord this ] @: a\n#foo a asWord \"beware: leaves instance of a\"\n#boo a a asWord \"beware: leaves instance of a\"\n```"
+      "desc": "( F -- W ): asserts that Form is a Word form, dies if\n it's not.\n\nFor example, the following expression dies:\n\n```\n100 asWord\n```\n\nEt cetera for all other forms, except:\n\n```\n#foo asWord leaves: [ foo ]\n```\n\n`__word__` hook can make a block usable in place of a word,\nprovided its definition leaves a word or a block which\nimplements '__word__':\n\n```\n[ $: x x $: __word__ this ] @: a\n#foo a asWord \"beware: leaves instance of a\"\n#boo a a asWord \"beware: leaves instance of a\"\n```"
     },
     "quotedWord?": {
       "name": "quotedWord?",
-      "desc": "( F -- true/false ): leaves whether Form is a quoted word\n form, or a block that implements '*asQuotedWord'.\n\n```\n##foo quotedWord? leaves: true\n[ ##foo $: *asQuotedWord this ] open quotedWord? leaves: true\n```"
+      "desc": "( F -- true/false ): leaves whether Form is a quoted word\n form, or a block that implements '__quotedWord__'.\n\n```\n##foo quotedWord? leaves: true\n[ ##foo $: __quotedWord__ this ] open quotedWord? leaves: true\n```"
     },
     "asQuotedWord": {
       "name": "asQuotedWord",
-      "desc": "( F -- Qw ): asserts that Form is a Quoted word form,\n dies if it's not.\n\nFor example, the following expression dies:\n\n```\n100 asQuotedWord\n```\n\nEt cetera for all other forms, except:\n\n```\n##foo asQuotedWord leaves: #foo\n```\n\n`*asQuotedWord` hook can make a block usable in place of\na quoted word, provided its definition leaves a quoted\nword or a block that implements `*asQuotedWord`:\n\n```\n[ $: x x $: *asQuotedWord this ] @: a\n##foo a asQuotedWord \"beware: leaves instance of a\"\n##boo a a asQuotedWord \"beware: leaves instance of a\"\n```"
+      "desc": "( F -- Qw ): asserts that Form is a Quoted word form,\n dies if it's not.\n\nFor example, the following expression dies:\n\n```\n100 asQuotedWord\n```\n\nEt cetera for all other forms, except:\n\n```\n##foo asQuotedWord leaves: #foo\n```\n\n`__quotedWord__` hook can make a block usable in place of\na quoted word, provided its definition leaves a quoted\nword or a block that implements `__quotedWord__`:\n\n```\n[ $: x x $: __quotedWord__ this ] @: a\n##foo a asQuotedWord \"beware: leaves instance of a\"\n##boo a a asQuotedWord \"beware: leaves instance of a\"\n```"
     },
     "decimal?": {
       "name": "decimal?",
-      "desc": "( F -- true/false ): leaves whether Form is a decimal form,\n or a block that implements '*asDecimal'.\n\n```\n123 decimal? leaves: true\n[ 123 $: *asDecimal this ] open decimal? leaves: true\n```"
+      "desc": "( F -- true/false ): leaves whether Form is a decimal form,\n or a block that implements '__decimal__'.\n\n```\n123 decimal? leaves: true\n[ 123 $: __decimal__ this ] open decimal? leaves: true\n```"
     },
     "asDecimal": {
       "name": "asDecimal",
-      "desc": "( F -- D ): asserts that Form is a Decimal form, dies if\n it's not.\n\nFor example, the following expression dies:\n\n```\n'foo' asDecimal\n```\n\nEt cetera for all other forms, except:\n\n```\n100 asDecimal leaves: 100\n```\n\n`*asDecimal` hook can make a block usable in place of a\ndecimal, provided its definition leaves a decimal or a\nblock that implements `*asDecimal`:\n\n```\n[ $: x x $: *asDecimal this ] @: a\n100 a asDecimal \"beware: leaves an instance of a\"\n200 a a asDecimal \"beware: leaves an instance of a\"\n```"
+      "desc": "( F -- D ): asserts that Form is a Decimal form, dies if\n it's not.\n\nFor example, the following expression dies:\n\n```\n'foo' asDecimal\n```\n\nEt cetera for all other forms, except:\n\n```\n100 asDecimal leaves: 100\n```\n\n`__decimal__` hook can make a block usable in place of a\ndecimal, provided its definition leaves a decimal or a\nblock that implements `__decimal__`:\n\n```\n[ $: x x $: __decimal__ this ] @: a\n100 a asDecimal \"beware: leaves an instance of a\"\n200 a a asDecimal \"beware: leaves an instance of a\"\n```"
     },
     "quote?": {
       "name": "quote?",
-      "desc": "( F -- true/false ): leaves whether Form is a quote form,\n or a block that implements '*asQuote'.\n\n```\n'foo' quote? leaves: true\n[ 'foo' $: *asQuote this ] open quote? leaves: true\n```"
+      "desc": "( F -- true/false ): leaves whether Form is a quote form,\n or a block that implements '__quote__'.\n\n```\n'foo' quote? leaves: true\n[ 'foo' $: __quote__ this ] open quote? leaves: true\n```"
     },
     "asQuote": {
       "name": "asQuote",
-      "desc": "( F -- Q ): asserts that Form is a Quote form, dies if\n it's not.\n\nFor example, the following expression dies:\n\n```\n100 asQuote\n```\n\nEt cetera for all other forms, except:\n\n```\n'foo' asQuote leaves: 'foo'\n```\n\n`*asQuote` hook can make a block usable in place of a\nquote, provided its definition leaves a quote or a block\nthat implements `*asQuote`:\n\n```\n[ $: x x $: *asQuote this ] @: a\n'foo' a asQuote \"beware: leaves instance of a\"\n'boo' a a asQuote \"beware: leaves instance of a\"\n```"
+      "desc": "( F -- Q ): asserts that Form is a Quote form, dies if\n it's not.\n\nFor example, the following expression dies:\n\n```\n100 asQuote\n```\n\nEt cetera for all other forms, except:\n\n```\n'foo' asQuote leaves: 'foo'\n```\n\n`__quote__` hook can make a block usable in place of a\nquote, provided its definition leaves a quote or a block\nthat implements `__quote__`:\n\n```\n[ $: x x $: __quote__ this ] @: a\n'foo' a asQuote \"beware: leaves instance of a\"\n'boo' a a asQuote \"beware: leaves instance of a\"\n```"
     },
     "boolean?": {
       "name": "boolean?",
-      "desc": "( F -- true/false ): leaves whether Form is a boolean form,\n or a block that implements '*asBoolean'.\n\n```\ntrue boolean? leaves: true\n[ true $: *asBoolean this ] open boolean? leaves: true\n```"
+      "desc": "( F -- true/false ): leaves whether Form is a boolean form,\n or a block that implements '__boolean__'.\n\n```\ntrue boolean? leaves: true\n[ true $: __boolean__ this ] open boolean? leaves: true\n```"
     },
     "asBoolean": {
       "name": "asBoolean",
-      "desc": "( F -- B ): asserts that Form is a Boolean form, dies if\n it's not.\n\nFor example, the following expression dies:\n\n```\n100 asBoolean\n```\n\nEt cetera for all other forms, except:\n\n```\ntrue asBoolean leaves: true\nfalse asBoolean leaves: false\n```\n\n`*asBoolean` hook can make a block usable in place of a\nboolean, provided its definition leaves a boolean or a\nblock that implements `*asBoolean`:\n\n```\n[ $: x x $: *asBoolean this ] @: a\ntrue a asBoolean \"beware: leaves an instance of a\"\ntrue a a asBoolean \"beware: leaves an instance of a\"\n```"
+      "desc": "( F -- B ): asserts that Form is a Boolean form, dies if\n it's not.\n\nFor example, the following expression dies:\n\n```\n100 asBoolean\n```\n\nEt cetera for all other forms, except:\n\n```\ntrue asBoolean leaves: true\nfalse asBoolean leaves: false\n```\n\n`__boolean__` hook can make a block usable in place of a\nboolean, provided its definition leaves a boolean or a\nblock that implements `__boolean__`:\n\n```\n[ $: x x $: __boolean__ this ] @: a\ntrue a asBoolean \"beware: leaves an instance of a\"\ntrue a a asBoolean \"beware: leaves an instance of a\"\n```"
     },
     "builtin?": {
       "name": "builtin?",
@@ -1266,19 +1510,19 @@
     },
     "color?": {
       "name": "color?",
-      "desc": "( F -- true/false ): leaves whether Form is a color form,\n or a block that implements '*asColor'.\n\n```\n0 0 0 rgb color? leaves: true\n[ 0 0 0 rgb $: *asColor this ] open color? leaves: true\n```"
+      "desc": "( F -- true/false ): leaves whether Form is a color form,\n or a block that implements '__color__'.\n\n```\n0 0 0 rgb color? leaves: true\n[ 0 0 0 rgb $: __color__ this ] open color? leaves: true\n```"
     },
     "asColor": {
       "name": "asColor",
-      "desc": "( F -- C ): asserts that Form is a Color form, dies if\n it's not.\n\nFor example, the following expression dies:\n\n```\n100 asColor\n```\n\nEt cetera for all other forms, except:\n\n```\n0 0 0 rgb asColor toQuote leaves: 'rgb(0, 0, 0)'\n```\n\n`*asColor` hook can make a block usable in place of a\ncolor, provided its definition leaves a color or a block\nthat implements `*asColor`:\n\n```\n[ $: x x $: *asColor this ] @: a\n0 0 0 rgb a asColor \"beware: leaves an instance of a\"\n0 0 0 rgb a a asColor \"beware: leaves an instance of a\"\n```"
+      "desc": "( F -- C ): asserts that Form is a Color form, dies if\n it's not.\n\nFor example, the following expression dies:\n\n```\n100 asColor\n```\n\nEt cetera for all other forms, except:\n\n```\n0 0 0 rgb asColor toQuote leaves: 'rgb(0, 0, 0)'\n```\n\n`__color__` hook can make a block usable in place of a\ncolor, provided its definition leaves a color or a block\nthat implements `__color__`:\n\n```\n[ $: x x $: __color__ this ] @: a\n0 0 0 rgb a asColor \"beware: leaves an instance of a\"\n0 0 0 rgb a a asColor \"beware: leaves an instance of a\"\n```"
     },
     "byteslice?": {
       "name": "byteslice?",
-      "desc": "( F -- true/false ): leaves whether Form is a byteslice\n form, or a block that implements '*asByteslice'.\n\n```\n'hello world' toByteslice byteslice? leaves: true\n[ [ 'Hi!' toByteslice ] $: *asByteslice this ] open byteslice? leaves: true\n```"
+      "desc": "( F -- true/false ): leaves whether Form is a byteslice\n form, or a block that implements '__byteslice__'.\n\n```\n'hello world' toByteslice byteslice? leaves: true\n[ [ 'Hi!' toByteslice ] $: __byteslice__ this ] open byteslice? leaves: true\n```"
     },
     "asByteslice": {
       "name": "asByteslice",
-      "desc": "( F -- B ): asserts that Form is a Byteslice form, dies if\n it's not.\n\nFor example, the following expression dies:\n\n```\n100 asByteslice\n```\n\nEt cetera for all other forms, except:\n\n```\n'hello world' toByteslice asByteslice leaves: '[byteslice, consists of 11 mutable byte(s)]'\n```\n\n`*asByteslice` hook can make a block usable in place of\na byteslice, provided its definition leaves a byteslice\nor a block that implements `*asByteslice`:\n\n```\n[ $: x x $: *asByteslice this ] @: a\n'foo' toByteslice a asByteslice \"beware: leaves an instance of a\"\n'foo' toByteslice a a asByteslice \"beware: leaves an instance of a\"\n```"
+      "desc": "( F -- B ): asserts that Form is a Byteslice form, dies if\n it's not.\n\nFor example, the following expression dies:\n\n```\n100 asByteslice\n```\n\nEt cetera for all other forms, except:\n\n```\n'hello world' toByteslice asByteslice leaves: '[byteslice, consists of 11 mutable byte(s)]'\n```\n\n`__byteslice__` hook can make a block usable in place of\na byteslice, provided its definition leaves a byteslice\nor a block that implements `__byteslice__`:\n\n```\n[ $: x x $: __byteslice__ this ] @: a\n'foo' toByteslice a asByteslice \"beware: leaves an instance of a\"\n'foo' toByteslice a a asByteslice \"beware: leaves an instance of a\"\n```"
     },
     "pushes": {
       "name": "pushes",
@@ -1538,7 +1782,7 @@
     },
     "desc": {
       "name": "desc",
-      "desc": "( F -- Dq ): leaves the Description quote of the given Form.\n\n```\n100 desc leaves: 'decimal number 100'\n'foobar' desc leaves: 'quote \\'foobar\\''\n[ 1 2 3 ] desc leaves: 'a block'\n[ \"I am a block\" 1 2 3 ] desc leaves: 'I am a block'\ntrue desc leaves: 'boolean true'\n```"
+      "desc": "( F -- Dq ): leaves the Description quote of the given Form.\n\n```\n100 desc leaves: 'decimal number 100'\n'foobar' desc leaves: 'quote 'foobar''\n[ 1 2 3 ] desc leaves: 'a block'\n[ \"I am a block\" 1 2 3 ] desc leaves: 'I am a block'\ntrue desc leaves: 'boolean true'\n```"
     },
     "typedesc": {
       "name": "typedesc",
