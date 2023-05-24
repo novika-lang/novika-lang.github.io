@@ -1,9 +1,5 @@
 {
   "words": {
-    "there": {
-      "name": "there",
-      "desc": "( S B -- S ): opens Block with Stack set as the active\n stack. Leaves Stack. Ahead is transferred to block.\n\n```\n[ 1 2 ] [ + ] there leaves: [ [ 3 ] ]\n[ 1 2 ] [ ahead thruBlock open ] + leaves: [ [ 3 ] ]\n```\n\n"
-    },
     "@:": {
       "name": "@:",
       "desc": "( F @: N -- ): creates an opener entry with the given\n Name in caller. Submits Form to the entry. Opener entries,\n when resolved to and opened, in turn **open** their\n corresponding Form.\n\n```\n\"Blocks are evaluated (opened) when the opener entry\nthey're stored under is opened.\"\n[ 1 2 + ] @: getThree\ngetThree leaves: [ 3 ]\n\n\"Builtins also get opened when under an opener entry.\"\n#+ here @: myAddAlias\n1 2 myAddAlias leaves: [ 3 ]\n\n\"Any other form is left as-is, even if it is a word.\"\n3 @: litThree\n#+ @: litPlus\nlitThree leaves: [ 3 ]\nlitPlus leaves: [ + ]\n```\n\n"
@@ -38,15 +34,15 @@
     },
     "vals": {
       "name": "vals",
-      "desc": "( B -- S ): activates an empty Stack for the duration\nof Block."
+      "desc": "( B -- S ): activates an empty Stack for the duration\n of Block.\n\n```\n[ 1 2 3 ] vals leaves: [ 1 2 3 ]\n[ (1 2 + 2 *) 'hello' ] vals leaves: [ 6 'hello' ]\n```\n\n"
     },
     "val": {
       "name": "val",
-      "desc": "( B -- T ): activates an empty stack for the duration of Block,\nand leaves Top form in the stack. Dies if none."
+      "desc": "( B -- T ): activates an empty stack for the duration of Block,\n and leaves Top form in the stack. Dies if none.\n\n```\n[ 1 2 3 ] val leaves: 3\n[ 'foo' 'bar' ~ ] val leaves: 'foobar'\n```\n\n"
     },
     "2val": {
       "name": "2val",
-      "desc": "( B1 B2 -- T1 T2 ): activates individual empty stacks for each\nof the two Blocks, and leaves their corresponding Top forms."
+      "desc": "( B1 B2 -- T1 T2 ): activates individual empty stacks for each\n of the two Blocks, and leaves their corresponding Top forms.\n\n```\n[ 1 2 + ] [ 3 4 + ] 2val leaves: [ 3 7 ]\n```\n\n"
     },
     "thruLitBlock": {
       "name": "thruLitBlock",
@@ -74,23 +70,27 @@
     },
     "br:": {
       "name": "br:",
-      "desc": "( D br: T F -- ? ): infix version of `br`."
+      "desc": "( D br: T F -- ? ): infix version of `br`.\n\n```\n(0 randTo: 100) odd? br:\n  [ 'Yay!' echo ]\n  [ 'Nay!' echo ]\n\n\"Say no to repetition!\"\n(0 randTo: 100) odd? (br: 'Yay!' 'Nay!') echo\n```\n\n"
     },
     "=>": {
       "name": "=>",
-      "desc": "( D => Tb -- ? ): opens True branch form if Determiner\nis truthy."
+      "desc": "( D => Tb -- ? ): opens True branch form if Determiner\n is truthy.\n\n```\n(0 randTo: 100) even? => [ 'Yay!' echo ]\n```\n\n"
+    },
+    "~>": {
+      "name": "~>",
+      "desc": "( D ~> Tb -- ? ): opens True branch form if Determiner\n is truthy.\n\nIf Determiner is a block, creates a copy of the stack and\nopens Determiner with that stack. If Determiner leaves a\ntruthy form, opens True branch form with the old stack.\nOtherwise, does nothing.\n\n```\n100 even? ~> 1 leaves: [ 1 ]\n101 even? ~> 1 leaves: [ ]\n\n100 ([ even? ] ~> [ 2 * ]) leaves: [ 200 ]\n101 ([ even? ] ~> [ 2 * ]) leaves: [ 101 ]\n\n2 4 ([ * even? ] ~> +) leaves: 6\n5 5 ([ * even? ] ~> +) leaves: [ 5 5 ]\n```\n\n"
     },
     "and": {
       "name": "and",
-      "desc": "( A B -- A/false ): leaves whether both A and B are truthy."
+      "desc": "( A B -- A/false ): leaves whether both A and B are truthy.\n\nSupports short-circuiting. Remember that in Novika, only `false`\nitself is falsey. Everything else is truthy.\n\n```\n(false false and) leaves: false\n(true false and) leaves: false\n(false true and) leaves: false\n(true true and) leaves: true\n\n(100 200 and) leaves: true\n(100 false and) leaves: false\n\n[ 100 even? ] [ 200 odd? ] and leaves: false\n```\n\n"
     },
     "or": {
       "name": "or",
-      "desc": "( A B -- true/A ): leaves whether A or B or both are truthy."
+      "desc": "( A B -- true/A ): leaves whether A or B or both are truthy.\n\nSupports short-circuiting. Remember that in Novika, only `false`\nitself is falsey. Everything else is truthy.\n\n```\n(false false or) leaves: false\n(true false or) leaves: true\n(false true or) leaves: true\n(true true or) leaves: true\n\n(100 200 or) leaves: true\n(100 false or) leaves: true\n\n[ 100 even? ] [ 200 odd? ] or leaves: false\n```\n\n"
     },
     "neither?": {
       "name": "neither?",
-      "desc": "( A B -- true/A ): same as `or not`, leaves whether neither\nA nor B is truthy."
+      "desc": "( A B -- true/A ): same as `or not`, leaves whether neither\n A nor B is truthy.\n\nSupports short-circuiting. Remember that in Novika, only `false`\nitself is falsey. Everything else is truthy.\n\n```\n[ 100 odd? ] [ 201 even? ] neither? leaves: true\n```\n\n"
     },
     "continues": {
       "name": "continues",
@@ -98,7 +98,7 @@
     },
     "repeat": {
       "name": "repeat",
-      "desc": "( -- ): executes caller again. Looping primitive. Too low-\nlevel for users, prefer not to use (use `loop` instead).\nBeware that it does not re-instantiate the block."
+      "desc": "( -- ): executes caller again. Looping primitive. Too low-\n level for users, prefer not to use (use `loop` instead).\n Beware that it does not re-instantiate the block.\n\n```\n[\n  'Looping indefinitely, yay!' echo\n\n  repeat\n] do\n```\n\n"
     },
     "dropContinuationsUntil": {
       "name": "dropContinuationsUntil",
@@ -110,15 +110,15 @@
     },
     "createLoop": {
       "name": "createLoop",
-      "desc": "( Ib -- Sh Bh Nh ): takes an Iteration body block and\nleaves three handles: Start handle to start the loop,\nNext handle to continue the loop, and Break handle to\nbreak the loop."
+      "desc": "( Ib -- Sh Bh Nh ): takes an Iteration body block and\n leaves three handles: Start handle to start the loop,\n Next handle to continue the loop, and Break handle to\n break the loop.\n\n```\n[ '> ' readLine not => nextCycle\n  [ 'quit' quitLoop\n    'next' nextCycle\n  ] choose\n  'You have entered: ' swap ~ echo\n] createLoop\n  @: nextCycle\n  @: quitLoop\n  @: startLoop\n\n'Hello! Type `quit` to quit!' echo\n  startLoop\n'Bye!' echo\n```\n\n"
     },
     "createDetachedLoop": {
       "name": "createDetachedLoop",
-      "desc": "( Bb C Cb -- Sh ): defines `break` and `next` for a Body\nblock that is being evaluated indirectly by a Control block,\nand only if Condition leaves a truthy value on top of the\nstack it hydrated. `next` resumes the Control block.\nLeaves Start handle to start the loop."
+      "desc": "( Bb C Cb -- Sh ): defines `break` and `next` for a Body\n block that is being evaluated indirectly by a Control block,\n and only if Condition leaves a truthy value on top of the\n stack it hydrated. `next` resumes the Control block.\n Leaves Start handle to start the loop.\n\n```\n\"Body block is the 'client' block of sorts:\"\n[ dup even? (br: ' is even!' ' is odd!') ~ echo\n] $: bodyBlock\n\n\n0 $: n\n\n\"Control block chooses whether, and how to run\nthe body block.\"\n[ n enclose bodyBlock hydrate\n  n 1 + =: n\n] $: controlBlock\n\n\"Condition block chooses whether to stop looping.\"\n[ n 5 <\n] $: conditionBlock\n\nbodyBlock conditionBlock controlBlock createDetachedLoop\n  @: startLoop\n\nstartLoop\n\n\"STDOUT: 0 is even!⏎\"\n\"STDOUT: 1 is odd!⏎\"\n\"STDOUT: 2 is even!⏎\"\n\"STDOUT: 3 is odd!⏎\"\n\"STDOUT: 4 is even!⏎\"\n\nn leaves: 5\n```\n\n"
     },
     "loop": {
       "name": "loop",
-      "desc": "( Ib -- ): basic infinite loop over an Iteration body block.\n`break` and `next` are available in the block. A new\nstack created for each iteration."
+      "desc": "( Ib -- ): basic infinite loop over an Iteration body block.\n `break` and `next` are available in the block. A new\n stack created for each iteration.\n\n```\n'Hello! Type `quit` to quit!' echo\n\n[ '> ' readLine not => next\n  [ 'quit' break\n    'next' next\n  ] choose\n  'You have entered: ' swap ~ echo\n] loop\n\n'Bye!' echo\n```\n\n"
     },
     "loop:": {
       "name": "loop:",
@@ -126,7 +126,7 @@
     },
     "while": {
       "name": "while",
-      "desc": "( C B -- ): hydrates an empty stack with Condition; if ToS\nis truthy afterwards, Block is opened over an empty stack.\nRepeats until ToS is false. Similar to `loop`, words `break`\nand `next` are available in Block."
+      "desc": "( C B -- ): hydrates an empty stack with Condition; if ToS\n is truthy afterwards, Block is opened over an empty stack.\n Repeats until ToS is false. Similar to `loop`, words `break`\n and `next` are available in Block.\n\n```\n1 to: 10 sample: 10 p $: numbers\n\n0 $: index\n\nwhile: [ numbers index fromLeft even? ]\n[\n  index 1 + =: index\n  index (numbers count) = => [\n    'No odd numbers :(' echo\n    1 bye\n  ]\n]\n\n'First odd number is: ' (numbers index fromLeft) ~ echo\n```\n\n"
     },
     "while:": {
       "name": "while:",
@@ -134,7 +134,7 @@
     },
     "until": {
       "name": "until",
-      "desc": "( C B -- ): inverse of `while` (opens Block while Condition\nis **false**), for more info see `while`."
+      "desc": "( C B -- ): inverse of `while` (opens Block while Condition\n is **false**), for more info see `while`.\n\n```\n1 to: 10 sample: 10 p $: numbers\n\n0 $: index\n\nuntil: [ numbers index fromLeft odd? ]\n[\n  index 1 + =: index\n  index (numbers count) = => [\n    'No odd numbers :(' echo\n    1 bye\n  ]\n]\n\n'First odd number is: ' (numbers index fromLeft) ~ echo\n```\n\n"
     },
     "until:": {
       "name": "until:",
@@ -142,7 +142,7 @@
     },
     "times": {
       "name": "times",
-      "desc": "( C B -- ): opens Block Count times. For each iteration\nof Block, a new stack block is activated with current Count\non top. `break` and `next` available."
+      "desc": "( C B -- ): opens Block Count times. For each iteration\n of Block, a new stack block is activated with current Count\n on top. `break` and `next` available.\n\n```\n16 times: [\n  even? ~> next\n  9 >= ~> break\n  echo\n]\n\n\"STDOUT: 1⏎\"\n\"STDOUT: 3⏎\"\n\"STDOUT: 5⏎\"\n\"STDOUT: 7⏎\"\n```\n\n"
     },
     "times:": {
       "name": "times:",
@@ -150,11 +150,11 @@
     },
     "compiledTimes": {
       "name": "compiledTimes",
-      "desc": "( N B -- ): **unsafe** `times` alternative for when you\n *really* need to iterate a lot.\n\nThis word basically strips off all steps in the `createDetachedLoop`\n(aka structured control flow) abstraction ladder.\n\nInternally, it's a bit like your Block being followed by a GOTO\nback to the beginning, plus a counter *on the stack*.\n\nNote that the loop is *compiled* from a template when you use\nthis word. **This means that opening this word multiple times\nin a row is inefficient**, as such compilation is expensive.\nHowever, if you need to *iterate* quickly, you can try using\nthis word.\n\nThe stack your Block is given is *not* owned by you. You must\nnot leave junk, and you must not drop the index. The effect\nof your block **must** be `( I -- I )`.\n\n`next` and `break` are **not** supported.\n\n"
+      "desc": "( N B -- ): **unsafe** `times` alternative for when you\n *really* need to iterate a lot.\n\nThis word basically strips off all steps in the `createDetachedLoop`\n(aka structured control flow) abstraction ladder.\n\nInternally, it's a bit like your Block being followed by a GOTO\nback to the beginning, plus a counter *on the stack*.\n\nNote that the loop is *compiled* from a template when you use\nthis word. **This means that opening this word multiple times\nin a row is inefficient**, as such compilation is expensive.\nHowever, if you need to *iterate* quickly, you can try using\nthis word.\n\nThe stack your Block is given is *not* owned by you. You must\nnot leave junk, and you must not drop the index. The effect\nof your block **must** be `( I -- I )`.\n\n`next` and `break` are **not** supported.\n\n```\n10_000 compiledTimes: [ $: index\n  index 2 * echo\n  index\n]\n```\n\n"
     },
     "compiledTimes:": {
       "name": "compiledTimes:",
-      "desc": "( N compiledTimes: B -- ): infix version of `compiledTimes`.\n\n```\n0 $: acc\n100000 compiledTimes: [ \"( I -- I )\"\n  dup acc + =: acc\n]\nacc echo \"STDOUT: 5000050000⏎\"\n```\n\n"
+      "desc": "( N compiledTimes: B -- ): infix version of `compiledTimes`.\n\n```\n0 $: acc\n100_000 compiledTimes: [ \"( I -- I )\"\n  dup acc + =: acc\n]\nacc echo \"STDOUT: 5000050000⏎\"\n```\n\n"
     },
     "2asc": {
       "name": "2asc",
@@ -470,15 +470,23 @@
     },
     "peek?": {
       "name": "peek?",
-      "desc": "( [ ... | F ... ]B -- F true / false ): leaves Form and/\n or a boolean for whether Form exists in Block.\n\n```\n[ 1 2 3 ] 1 |to \"[ 1 | 2 3 ]\" peek? leaves: [ 2 true ]\n[ 1 2 3 ] \"[ 1 2 3 | ]\" peek? leaves: [ false ]\n```\n\n"
+      "desc": "( [ ... | F ... ]B -- F true / false ): leaves Form and/\n or a boolean for whether Form exists in Block.\n\n```\n[ 1 | 2 3 ] peek? leaves: [ 2 true ]\n[ 1 2 3 | ] peek? leaves: false\n```\n\n"
+    },
+    "|afterFirst?": {
+      "name": "|afterFirst?",
+      "desc": "( B -- true/false ): leaves whether cursor is after the\n first form in Block.\n\n```\n[ | ] |afterFirst? leaves: false\n[ 1 | ] |afterFirst? leaves: true\n[ 1 | 2 3 ] |afterFirst? leaves: true\n[ 1 2 3 | ] |afterFirst? leaves: false\n```\n\n"
+    },
+    "|afterLast?": {
+      "name": "|afterLast?",
+      "desc": "( B -- true/false ): leaves whether cursor is after the\n last form in Block.\n\n```\n[ | ] |afterLast? leaves: true\n[ 1 | ] |afterLast? leaves: true\n[ | 1 2 3 ] |afterLast? leaves: false\n[ 1 | 2 3 ] |afterLast? leaves: false\n[ 1 2 3 | ] |afterLast? leaves: true\n```\n\n"
     },
     "|-": {
       "name": "|-",
-      "desc": "( B N -- ): decrements block cursor position: moves\n cursor back N times in Block.\n\n```\n\"Note: `toQuote` is simply the most compact way to\n present the result. It doesn't do anything to the\n cursor.\"\n[ 1 2 3 ] \"[ 1 2 3 | \" dup 2 |- toQuote leaves: '[ 1 | 2 3 ]'\n```\n\n"
+      "desc": "( B N -- ): decrements block cursor position: moves\n cursor back N times in Block.\n\n```\n[ 1 2 3 | ] dup 2 |- leaves: [ [ 1 | 2 3 ] ]\n```\n\n"
     },
     "|+": {
       "name": "|+",
-      "desc": "( B N -- ): increments block cursor position: moves\n cursor forward N times in Block.\n\n```\n[ 1 2 3 ] $: block\nblock 1 |to\nblock toQuote leaves: '[ 1 | 2 3 ]'\nblock 1 |+\nblock toQuote leaves: '[ 1 2 | 3 ]'\nblock 1 |+\nblock toQuote leaves: '[ 1 2 3 ]'\n```\n\n"
+      "desc": "( B N -- ): increments block cursor position: moves\n cursor forward N times in Block.\n\n```\n[ 1 2 3 ] $: block\nblock 1 |to\nblock leaves: [ [ 1 | 2 3 ] ]\nblock 1 |+\nblock leaves: [ [ 1 2 | 3 ] ]\nblock 1 |+\nblock leaves: [ [ 1 2 3 | ] ]\n```\n\n"
     },
     "|:": {
       "name": "|:",
@@ -486,15 +494,15 @@
     },
     "|clamp": {
       "name": "|clamp",
-      "desc": "( B N -- ): moves the cursor in Block to N. If N\n is negative, the cursor is moved to 0. If N is greater\n than the amount of forms in Block, the cursor is moved\n to the end of Block.\n\n```\n[ 1 2 3 ] $: x\nx 1 |clamp\nx toQuote leaves: '[ 1 | 2 3 ]'\nx 1000 |clamp\nx toQuote leaves: '[ 1 2 3 ]'\nx -1000 |clamp\nx toQuote leaves: '[ | 1 2 3 ]'\n```\n\n"
+      "desc": "( B N -- ): moves the cursor in Block to N. If N\n is negative, the cursor is moved to 0. If N is greater\n than the amount of forms in Block, the cursor is moved\n to the end of Block.\n\n```\n[ 1 2 3 ] $: x\nx 1 |clamp\nx leaves: [ [ 1 | 2 3 ] ]\nx 1000 |clamp\nx leaves: [ [ 1 2 3 | ] ]\nx -1000 |clamp\nx leaves: [ [ | 1 2 3 ] ]\n```\n\n"
     },
     "|hydrate": {
       "name": "|hydrate",
-      "desc": "( Lb N B -- ): moves the cursor in List block to N,\n then hydrates List block with Block. After Block had\n executed *successfully*, moves the cursor in List\n block back to where it was before `|hydrate` (clamped\n to either end, if necessary).\n\n```\n[ 1 2 3 ] $: x\n\nx 1 |to\nx toQuote leaves: '[ 1 | 2 3 ]'\n\nx 2 [ + ] |hydrate\nx toQuote leaves: '[ 3 | 3 ]'\n\nx 2 [ 2drop ] |hydrate\nx toQuote leaves: '[ ]'\n```\n\n"
+      "desc": "( Lb N B -- ): moves the cursor in List block to N,\n then hydrates List block with Block. After Block had\n executed *successfully*, moves the cursor in List\n block back to where it was before `|hydrate` (clamped\n to either end, if necessary).\n\n```\n[ 1 | 2 3 ] $: x\n\nx 2 [ + ] |hydrate\nx leaves: [ [ 3 | 3 ] ]\n\nx 2 [ 2drop ] |hydrate\nx leaves: [ [ ] ]\n```\n\n"
     },
     "|swap": {
       "name": "|swap",
-      "desc": "( -- ): swaps the item before and after cursor in the\n active stack.\n\n```\n[ 1 2 3 ] $: block\nblock 1 |-\nblock toQuote leaves: '[ 1 2 | 3 ]'\nblock [ |swap ] there\nblock toQuote leaves: '[ 1 3 | 2 ]'\n```\n\n"
+      "desc": "( -- ): swaps the item before and after cursor in the\n active stack.\n\n```\n[ 1 2 | 3 ] $: block\nblock [ |swap ] there\nblock leaves: [ [ 1 3 | 2  ] ]\n```\n\n"
     },
     "gulp": {
       "name": "gulp",
@@ -552,6 +560,14 @@
       "name": "adopt",
       "desc": "( P C -- C ): same as `reparent`, but in different order."
     },
+    "--": {
+      "name": "--",
+      "desc": "( P `--` C -- C ): infix version of `adopt`.\n\n```\n[ 100 $: x ] obj $: a\n[ 200 $: y ] obj $: b\n\n(a -- b -- a) drop\na -> [x y] leaves: [ [ 100 200 ] ]\nb -> [x y] leaves: [ [ 100 200 ] ]\n```\n\n"
+    },
+    "·>": {
+      "name": "·>",
+      "desc": "( B ·> F -- F ): infix version of `befriend` that leaves\n the *friend* for further chaining.\n\n```\n[ 100 $: x ] obj $: a\n[ 200 $: y ] obj $: b\na ·> b ·> a drop\n\na.x leaves: 100\na.y leaves: 200\n\nb.x leaves: 100\nb.y leaves: 200\n\na [ 'Hello World' =: x ] extend\n\na.x leaves: 'Hello World'\na.y leaves: 200\n\nb.x leaves: 'Hello World'\nb.y leaves: 200\n```\n\n"
+    },
     "child": {
       "name": "child",
       "desc": "( B -- Cb ): leaves an empty Child block for Block. Very\nmuch like `new`, but doesn't copy the tape and therefore may\nbe faster in certain circumstances."
@@ -559,10 +575,6 @@
     "->": {
       "name": "->",
       "desc": "( Db -> N -- F ): Resolves Name, a word, using the\n given Dictionary block (block with a dictionary and/or\n relatives, therefore, simply any block). Does not\n distinguish between entry types (i.e., it doesn't matter\n whether Name resolves to an opener or a pusher entry):\n its value Form is always *pushed* onto the active stack.\n\n```\n[ 100 $: x 200 $: y [ x y + ] @: sum ] obj $: point\n\npoint -> x leaves: 100\npoint -> y leaves: 200\npoint -> sum leaves: [ [ x y + ] ] \"Beware!\"\n\n\"Note that we still can open it and get the result:\"\nopen leaves: 300\n```\n\nIt is possible to access multiple entries when Name is a\nblock, *preserving block structure*:\n\n```\n[ 100 $: x 200 $: y ] obj -> [ x y ] leaves: [ [ 100 200 ] ]\n[ 100 $: x 200 $: y ] obj -> [ [ [ x ] ] y ] leaves: [ [ [ [ 100 ] ] 200 ] ]\n```\n\n"
-    },
-    "entry:open": {
-      "name": "entry:open",
-      "desc": "( Db C N -- ... ): resolves Name in Dictionary block and\n*opens* it, assuming Caller to be the caller block.\nPostfix version of `.`. See `.` for usage examples."
     },
     ".": {
       "name": ".",
@@ -572,9 +584,21 @@
       "name": "fetch:",
       "desc": "( Db N fetch: B -- ): resolves Name using Dictionary\n block, and opens Block with the resolved entry's value\n form *on top of the caller stack.* If Name could not be\n resolved using the dictionary block, or if the dictionary\n block  is something other than block, does nothing.\n Itself, leaves nothing (unless Block is empty: in that\n case, leaves the value form if resolved successfully).\n\n```\n'This is not a block!' #x fetch: [ 1 + ] leaves: [ ]\n[ 100 $: x ] obj #x fetch: [ 1 + ] leaves: [ 101 ]\n[ 100 $: x ] obj #undefinedThing fetch: [ 1 + ] leaves: [ ]\n```\n\n"
     },
+    "extendWith": {
+      "name": "extendWith",
+      "desc": "( S B -- S ): extends Source block with entries from the dictionary\n of Body block, then instantiates Body block, befriends the instance\n with Source block, and opens Body block with an empty stack. When the\n Body block instance finishes running, extends Source block with entries\n from the instance. Leaves Source block.\n\nAll complexities and edge cases aside, this word is basically one of\nthe ways to redefine/create/modify an entry through computation and\nfrom another, possibly unrelated block (unrelated as in via the block\ngraph, that is).\n\n**Important**: Source block is not extended with *private entries*\nof Body block or Body block instance (that is, entries whose name\nstarts with _underscore). However, Body block does get access and\nis able to reassign private entries of Source block.\n\nSee `extendWith:` for an example.\n\n"
+    },
+    "extendWith:": {
+      "name": "extendWith:",
+      "desc": "( S extendWith: B -- S ): infix version of `extendWith`.\n\n```\n[ 100 $: x ] obj $: a\n[ 200 $: y ] obj $: b\n\na ·> b ·> a drop\n\na.x a.y leaves: [ 100 200 ]\nb.x b.y leaves: [ 100 200 ]\n\na extendWith: [ [ y y * ] @: x ] drop\nb extendWith: [ 4 =: y ] drop\n\na.x a.y leaves: [ 16 4 ]\nb.x b.y leaves: [ 16 4 ]\n\nb extendWith: [ 100 $: y ] drop\n\na.x a.y leaves: [ 10000 100 ]\nb.x b.y leaves: [ 10000 100 ]\n```\n\n"
+    },
+    "extend:": {
+      "name": "extend:",
+      "desc": "( S extend: B -- ): an alternative infix version of `extendWith`\n which doesn't leave anything.\n\n```\n[ 100 $: x ] obj $: a\n[ 200 $: y ] obj $: b\n\na ·> b ·> a drop\n\na.x a.y leaves: [ 100 200 ]\nb.x b.y leaves: [ 100 200 ]\n\na extend: [ [ y y * ] @: x ]\nb extend: [ 4 =: y ]\n\na.x a.y leaves: [ 16 4 ]\nb.x b.y leaves: [ 16 4 ]\n\nb extend: [ 100 $: y ]\n\na.x a.y leaves: [ 10000 100 ]\nb.x b.y leaves: [ 10000 100 ]\n```\n\n"
+    },
     "|slideRight": {
       "name": "|slideRight",
-      "desc": "( Lb B -- Lb ): slides cursor in List block from left\n to right, in steps of one. Opens Block with List block as\n the stack *after* each step. Leaves List block. `break`\n and `next` are available.\n\n```\n[ 1 2 3 ] dup 1 |to [ + ] |slideRight leaves: [ [ 6 ] ]\n```\n\nIn the table below, sliding step is marked with '*', and\nblock iteration is postfixed by a '+'.\n\n```text\n +------+-------+-------------+\n | #    | form  |    list     |\n +======+=======+=============+\n | 0    |       | [ 1 2 3 ]   |\n | 1    | 1 |to | [ 1 | 2 3 ] |\n | *    |       | [ 1 2 | 3 ] |\n | 3+   |    +  | [ 3 | 3 ]   |\n | *    |       | [ 3 3 ]     |\n | 5+   |    +  | [ 6 ]       |\n +------+-------+-------------+\n```\n\n"
+      "desc": "( Lb B -- Lb ): slides cursor in List block from left\n to right, in steps of one. Opens Block with List block as\n the stack *after* each step. Leaves List block. `break`\n and `next` are available.\n\n```\n[ 1 | 2 3 ] [ + ] |slideRight leaves: [ [ 6 ] ]\n```\n\nIn the table below, sliding step is marked with '*', and\nblock iteration is postfixed by a '+'.\n\n```text\n +------+-------+-------------+\n | #    | form  |    list     |\n +======+=======+=============+\n | 0    |       | [ 1 2 3 ]   |\n | 1    | 1 |to | [ 1 | 2 3 ] |\n | *    |       | [ 1 2 | 3 ] |\n | 3+   |    +  | [ 3 | 3 ]   |\n | *    |       | [ 3 3 ]     |\n | 5+   |    +  | [ 6 ]       |\n +------+-------+-------------+\n```\n\n"
     },
     "|->": {
       "name": "|->",
@@ -582,7 +606,7 @@
     },
     "|~>": {
       "name": "|~>",
-      "desc": "( Lb |~> B -- Lb ): similar to `|->`, but remembers the\n cursor position in List block and restores it after all\n items were visited by Block (clamping to either end,\n if necessary).\n\n```\n[ 1 2 3 ] $: x\n\nx 1 |to\nx toQuote leaves: '[ 1 | 2 3 ]'\n\nx |~> [ 1 + ]\nx toQuote leaves: '[ 1 | 3 4 ]'\n```\n\n"
+      "desc": "( Lb |~> B -- Lb ): similar to `|->`, but remembers the\n cursor position in List block and restores it after all\n items were visited by Block (clamping to either end,\n if necessary).\n\n```\n[ 1 | 2 3 ] $: x\nx |~> [ 1 + ]\nx leaves: [ [ 1 | 3 4 ] ]\n```\n\n"
     },
     "||->": {
       "name": "||->",
@@ -590,7 +614,7 @@
     },
     "||~>": {
       "name": "||~>",
-      "desc": "( Lb |~> B -- Lb ): similar to `||->`, but remembers\n the cursor position in List block and restores it after\n all items were visited by Block (clamping to either end,\n if necessary).\n\n```\n[ 1 2 3 ] $: x\n\nx 1 |to\nx toQuote leaves: '[ 1 | 2 3 ]'\n\nx ||~> [ 1 + ]\nx toQuote leaves: '[ 2 | 3 4 ]'\n```\n\n"
+      "desc": "( Lb |~> B -- Lb ): similar to `||->`, but remembers\n the cursor position in List block and restores it after\n all items were visited by Block (clamping to either end,\n if necessary).\n\n```\n[ 1 | 2 3 ] $: x\nx leaves: [ [ 1 | 2 3 ] ]\nx ||~> [ 1 + ]\nx leaves: [ [ 2 | 3 4 ] ]\n```\n\n"
     },
     "|slideLeft": {
       "name": "|slideLeft",
@@ -624,6 +648,14 @@
       "name": "pairs:",
       "desc": "( Lb pairs: B -- ): infix version of `pairs`.\n\n```\n[ 1 2 3 4 ] pairs: [ + echo ]\n\"STDOUT: 3⏎\"\n\"STDOUT: 7⏎\"\n```\n\n"
     },
+    "mapPairs": {
+      "name": "mapPairs",
+      "desc": "( Lb B -- Rb ): leaves Result block obtained by collecting\n results of Block opened with previous Result block as the stack,\n plus a pair of items from List block, for each pair of items\n in List block. Dies if List block has an odd number of forms.\n `break` and `next` are available.\n\n```\n\"Sum pairs of numbers 1, 2; 3, 4; 5, 6 etc.:\"\n1 to: 10 mapPairs: + leaves: [ [ 3 7 11 15 19 ] ]\n```\n\n"
+    },
+    "mapPairs:": {
+      "name": "mapPairs:",
+      "desc": "( Lb mapPairs: B -- Rb ): infix version of `mapPairs`.\n\n```\n\"Sum pairs of numbers 1, 2; 3, 4; 5, 6 etc.:\"\n1 to: 10 mapPairs: + leaves: [ [ 3 7 11 15 19 ] ]\n```\n\n"
+    },
     "consPairs": {
       "name": "consPairs",
       "desc": "( Lb B -- ): opens Block with consequtive pairs of items\n from List block on top of an empty stack. `break` and `next`\n are available.\n\n```\n[ ] [ + echo ] consPairs\n[ 1 ] [ + echo ] consPairs\n\"Both do nothing!\"\n\n[ 1 2 ] [ + echo ] consPairs\n\"STDOUT: 3⏎ (i.e, 1 + 2)\"\n\n[ 1 2 3 ] [ + echo ] consPairs\n\"STDOUT: 3⏎ (i.e., 1 + 2)\"\n\"STDOUT: 5⏎ (i.e., 2 + 3)\"\n```\n\n"
@@ -631,6 +663,14 @@
     "consPairs:": {
       "name": "consPairs:",
       "desc": "( Lb B -- ): infix version of `consPairs`.\n\n```\n[ 1 2 3 ] consPairs: [ + echo ]\n\"STDOUT: 3⏎\"\n\"STDOUT: 5⏎\"\n```\n\n"
+    },
+    "mapConsPairs": {
+      "name": "mapConsPairs",
+      "desc": "( Lb B -- Rb ): leaves Result block obtained by collecting\n results of Block opened with previous Result block as the stack,\n plus a **consecutive** pair of items from List block, for each\n consecutive pair of items in List block. `break` and `next`\n are available.\n\n```\n\"Sum pairs of numbers 1, 2; 2, 3; 3, 4 etc.:\"\n1 to: 10 mapConsPairs: + leaves: [ [ 3 5 7 9 11 13 15 17 19 ] ]\n```\n\n"
+    },
+    "mapConsPairs:": {
+      "name": "mapConsPairs:",
+      "desc": "( Lb mapConsPairs: B -- Rb ): infix version of `mapConsPairs`.\n\n```\n\"Sum pairs of numbers 1, 2; 2, 3; 3, 4 etc.:\"\n1 to: 10 mapConsPairs: + leaves: [ [ 3 5 7 9 11 13 15 17 19 ] ]\n```\n\n"
     },
     "map": {
       "name": "map",
@@ -698,7 +738,7 @@
     },
     "conjure": {
       "name": "conjure",
-      "desc": "( S D -- I ): given a Source block and a Destination\n block, leaves an Instance of Destination block with all\n words (see `word?`) replaced with entry values from\n dictionary of Source (they are **not** opened), and all\n quoted words unquoted (see `quotedWord?`). Recurses on\n sub-blocks.\n\n```\n1 $: x\n2 $: y\n#+ $: plus\n\nthis [ x y plus #dup plus [ ##foo #echo ] #open ] conjure\n  leaves: [ [ 1 2 + dup + [ #foo echo ] #open ] ]\n\nopen leaves: 6\n\"STDOUT: foo⏎\"\n```\n\n"
+      "desc": "( S D -- I ): given a Source block and a Destination\n block, leaves an Instance of the Destination block with all\n words (see `word?`) replaced with entry values from the\n dictionary of Source (they are **not** opened), and all\n quoted words unquoted (see `quotedWord?`). Recurses on\n sub-blocks.\n\n```\n1 $: x\n2 $: y\n#+ $: plus\n\nthis [ x y plus #dup plus [ ##foo #echo ] #open ] conjure\n  leaves: [ [ 1 2 + dup + [ #foo echo ] #open ] ]\n\nopen leaves: 6\n\"STDOUT: foo⏎\"\n```\n\n"
     },
     "here": {
       "name": "here",
@@ -754,7 +794,7 @@
     },
     "collect": {
       "name": "collect",
-      "desc": "( N B -- Lb ): leaves a List block with N results of\n opening Block with the current N. Basically a combo of\n `times` and `map`. `break` and `next` are available. The\n current result is skipped if stack is empty after opening\n Block.\n\n```\n3 [ readLine br: [ stack swap slurp ] 0 ] collect\nINPUT: 0 3\nINPUT: 1 5\nINPUT: 2 12\n\nleaves: [ [ 3 5 12 ] ]\n```\n\n"
+      "desc": "( N B -- Lb ): leaves a List block with N results of\n opening Block with the current N. Basically a combo of\n `times` and `map`. `break` and `next` are available. The\n current result is skipped if stack is empty after opening\n Block.\n\n```\n10 collect: [ [ odd? ] ~> drop ]\n       map: [ 2 * ]\n      only: [ 10 < ]\n    leaves: [ [ 0 4 8 ] ]\n```\n\n"
     },
     "collect:": {
       "name": "collect:",
@@ -822,7 +862,7 @@
     },
     "|afterOrToEnd?": {
       "name": "|afterOrToEnd?",
-      "desc": "( Lb C -- Sfb true/false ): slides right (see `|slideRight`)\n through List block, executes Condition block for each form under\n the cursor. Stops *after* form if Condition block left true for it.\n Leaves Skipped forms block. Leaves true when Condition matched,\n false when reached the end of List block without a match.\n\nNote: if Condition is not a block, it is wrapped like so:\n`[ C = ]`.\n\nUseful for writing parsers for Novika DSLs.\n\n```\n[ 1 2 3 4 5 6 ] $: a\na 1 |to\na toQuote leaves: '[ 1 | 2 3 4 5 6 ]''\n\n[ 4 = ] |afterOrToEnd? leaves: [ [ 2 3 ] true ]\n\na echo\n\"STDOUT: [ 1 2 3 4 | 5 6 ]⏎\"\n```\n\n"
+      "desc": "( Lb C -- Sfb true/false ): slides right (see `|slideRight`)\n through List block, executes Condition block for each form under\n the cursor. Stops *after* form if Condition block left true for it.\n Leaves Skipped forms block. Leaves true when Condition matched,\n false when reached the end of List block without a match.\n\nNote: if Condition is not a block, it is wrapped like so:\n`[ C = ]`.\n\nUseful for writing parsers for Novika DSLs.\n\n```\n[ 1 | 2 3 4 5 6 ] $: a\na [ 4 = ] |afterOrToEnd? leaves: [ [ 2 3 ] true ]\na leaves: [ [ 1 2 3 4 | 5 6 ] ]\n```\n\n"
     },
     "|afterOrToEnd?:": {
       "name": "|afterOrToEnd?:",
@@ -838,7 +878,7 @@
     },
     "|afterOrDie": {
       "name": "|afterOrDie",
-      "desc": "( Lb C -- Sfb ): same as `|afterOrToEnd?`, but dies when reached\n end of List block without matching.\n\nWhen Condition is a block, its desc, if available, is\ndisplayed as the thing that was expected. Otherwise,\nCondition itself is displayed.\n\n```\n[ 1 2 3 4 5 6 ] $: a\na 1 |to\na toQuote leaves: '[ 1 | 2 3 4 5 6 ]''\n\na 4 |afterOrDie leaves: [ [ 2 3 ] ]\na echo\n\"STDOUT: [ 1 2 3 4 | 5 6 ]⏎\"\n```\n\n"
+      "desc": "( Lb C -- Sfb ): same as `|afterOrToEnd?`, but dies when reached\n end of List block without matching.\n\nWhen Condition is a block, its desc, if available, is\ndisplayed as the thing that was expected. Otherwise,\nCondition itself is displayed.\n\n```\n[ 1 | 2 3 4 5 6 ] $: a\na 4 |afterOrDie leaves: [ [ 2 3 ] ]\na leaves: [ [ 1 2 3 4 | 5 6 ] ]\n```\n\n"
     },
     "|afterOrDie:": {
       "name": "|afterOrDie:",
@@ -846,7 +886,7 @@
     },
     "|beforeOrToEnd?": {
       "name": "|beforeOrToEnd?",
-      "desc": "( Lb C -- Sfb true/false ): similar to `|afterOrToEnd?`, but\n leaves the cursor in List block *before* the matching\n item.\n\n```\n[ 1 2 3 4 5 6 ] $: a\na 1 |to\na toQuote leaves: '[ 1 | 2 3 4 5 6 ]'\n\na 4 |beforeOrToEnd leaves: [ [ 2 3 ] ]\na echo\n\"STDOUT: [ 1 2 3 | 4 5 6 ]⏎\"\n```\n\n"
+      "desc": "( Lb C -- Sfb true/false ): similar to `|afterOrToEnd?`, but\n leaves the cursor in List block *before* the matching\n item.\n\n```\n[ 1 | 2 3 4 5 6 ] $: a\na 4 |beforeOrToEnd leaves: [ [ 2 3 ] ]\na leaves: [ [ 1 2 3 | 4 5 6 ] ]\n```\n\n"
     },
     "|beforeOrToEnd?:": {
       "name": "|beforeOrToEnd?:",
@@ -862,7 +902,7 @@
     },
     "|beforeOrDie": {
       "name": "|beforeOrDie",
-      "desc": "( Lb C -- Sfb ): similar to `|afterOrDie`, but leaves the\n cursor in List block *before* the matching item.\n\n```\n[ 1 2 3 4 5 6 ] $: a\na 1 |to\na toQuote leaves: '[ 1 | 2 3 4 5 6 ]'\n\na 4 |beforeOrDie leaves: [ [ 2 3 ] ]\na echo\n\"STDOUT: [ 1 2 3 | 4 5 6 ]⏎\"\n```\n\n"
+      "desc": "( Lb C -- Sfb ): similar to `|afterOrDie`, but leaves the\n cursor in List block *before* the matching item.\n\n```\n[ 1 | 2 3 4 5 6 ] $: a\na 4 |beforeOrDie leaves: [ [ 2 3 ] ]\na leaves: [ [ 1 2 3 | 4 5 6 ] ]\n```\n\n"
     },
     "|beforeOrDie:": {
       "name": "|beforeOrDie:",
@@ -898,15 +938,39 @@
     },
     "|ring": {
       "name": "|ring",
-      "desc": "( B N -- Rb ): leaves a Ring block of N (if possible)\n forms left and right of the cursor in Block. If either\n side contains less forms than N, leaves all forms found\n in it. Puts cursor in Ring block after last form in the\n left-hand side of the ring.\n\nDies if N <= 0 (there are only >zero rings). Dies if Block\nis empty (because it cannot contain >zero rings).\n\nRing block also holds Block index of where the first\nform of the ring is (entry `firstAt`), and where the\nlast form of the ring is (entry `lastAt`).\n\nHere is a diagram which may help you understand what a\nring is:\n\n```text\n┌───────────────────────┐\n│ 3 |ring               │\n│                       │\n│   ┌───────────────┐   │\n│   │ 2 |ring       │   │\n│   │               │   │\n│   │   ┌───────┐   │   │\n│   │   │1 |ring│   │   │\n│   │   │       │   │   │\n│ 1 │ 2 │ 3 | 4 │ 5 │ 6 │\n│   │   │       │   │   │\n│   │   └───────┘   │   │\n│   │               │   │\n│   └───────────────┘   │\n│                       │\n└───────────────────────┘\n```\n\nAnd in code:\n\n```\n[ 1 2 3 \"|\" 4 5 6 ] dup 3 |to $: block\n\nblock 1 |ring toQuote leaves: '[ 3 | 4 · ${firstAt :: 2} ${lastAt :: 3} ]'\nblock 2 |ring toQuote leaves: '[ 2 3 | 4 5 · ${firstAt :: 1} ${lastAt :: 4} ]'\nblock 3 |ring toQuote leaves: '[ 1 2 3 | 4 5 6 · ${firstAt :: 0} ${lastAt :: 5} ]'\nblock 4 |ring toQuote leaves: '[ 1 2 3 | 4 5 6 · ${firstAt :: 0} ${lastAt :: 5} ]'\nblock 100 |ring toQuote leaves: '[ 1 2 3 | 4 5 6 · ${firstAt :: 0} ${lastAt :: 5} ]'\n```\n\n"
+      "desc": "( B N -- Rb ): leaves a Ring block of N (if possible)\n forms left and right of the cursor in Block. If either\n side contains less forms than N, leaves all forms found\n in it. Puts cursor in Ring block after last form in the\n left-hand side of the ring.\n\nDies if N <= 0 (there are only >zero rings). Dies if Block\nis empty (because it cannot contain >zero rings).\n\nRing block also holds Block index of where the first\nform of the ring is (entry `firstAt`), and where the\nlast form of the ring is (entry `lastAt`).\n\nHere is a diagram which may help you understand what a\nring is:\n\n```text\n┌───────────────────────┐\n│ 3 |ring               │\n│                       │\n│   ┌───────────────┐   │\n│   │ 2 |ring       │   │\n│   │               │   │\n│   │   ┌───────┐   │   │\n│   │   │1 |ring│   │   │\n│   │   │       │   │   │\n│ 1 │ 2 │ 3 | 4 │ 5 │ 6 │\n│   │   │       │   │   │\n│   │   └───────┘   │   │\n│   │               │   │\n│   └───────────────┘   │\n│                       │\n└───────────────────────┘\n```\n\nAnd in code:\n\n```\n[ 1 2 3 | 4 5 6 ] $: block\n\nblock 1 |ring toQuote leaves: '[ 3 | 4 · ${firstAt :: 2} ${lastAt :: 3} ]'\nblock 2 |ring toQuote leaves: '[ 2 3 | 4 5 · ${firstAt :: 1} ${lastAt :: 4} ]'\nblock 3 |ring toQuote leaves: '[ 1 2 3 | 4 5 6 · ${firstAt :: 0} ${lastAt :: 5} ]'\nblock 4 |ring toQuote leaves: '[ 1 2 3 | 4 5 6 · ${firstAt :: 0} ${lastAt :: 5} ]'\nblock 100 |ring toQuote leaves: '[ 1 2 3 | 4 5 6 · ${firstAt :: 0} ${lastAt :: 5} ]'\n```\n\n"
     },
     "sample": {
       "name": "sample",
       "desc": "( B -- Rf ): leaves a Random form from the given Block.\n\n```\n[ 1 2 3 4 ] sample leaves: \"... a random form from the block, let's say 2\"\n```\n\n"
     },
+    "samples": {
+      "name": "samples",
+      "desc": "( B C samples -- S ): samples the given Block Count times,\n and leaves the resulting block of Samples.\n\n```\n[ 1 2 3 4 ] 2 samples leaves: \"... [ (a random form) (a random form) ]\"\n'hello world' 2 samples leaves: \"... [ (a random quote) (a random quote) ]\"\n```\n\n"
+    },
     "sample:": {
       "name": "sample:",
-      "desc": "( B sample: C -- S ): samples the given Block Count times,\n and leaves the resulting block of Samples\n\n```\n[ 1 2 3 4 ] sample: 2 leaves: \"... [ (a random form) (a random form) ]\"\n```\n\n"
+      "desc": "( B sample: C -- S ): infix version of `samples`.\n\n```\n[ 1 2 3 4 ] sample: 2 leaves: \"... [ (a random form) (a random form) ]\"\n```\n\n"
+    },
+    "flat:deep": {
+      "name": "flat:deep",
+      "desc": "( B -- Dfb ): leaves Deeply flattened block for the\n given Block.\n\nSelf-references are ignored. **Most importantly**, deeply\nflattened block is a child of Block.\n\n```\n[ ] flat leaves: [ [ ] ]\n[ 1 2 3 ] flat leaves: [ [ 1 2 3 ] ]\n[ [ 1 ] [ 2 ] [ 3 ] ] flat leaves: [ [ 1 2 3 ] ]\n\"... etc.\"\n\n[ [ 100 ] $: x ] obj $: foo\n\nfoo flat $: flattened\nflattened leaves: [ [ 100 $: x ] ]\nflattened.x leaves: 100\n\"... etc.\"\n\n[ ] $: bar\nbar bar shove\nbar flat leaves: [ [ ] ]\n```\n\n"
+    },
+    "flat": {
+      "name": "flat",
+      "desc": "( B -- Dfb ): leaves Deeply flattened block for the\n given Block.\n\nSelf-references are ignored. **Most importantly**, deeply\nflattened block is a child of Block.\n\n```\n[ ] flat leaves: [ [ ] ]\n[ 1 2 3 ] flat leaves: [ [ 1 2 3 ] ]\n[ [ 1 ] [ 2 ] [ 3 ] ] flat leaves: [ [ 1 2 3 ] ]\n\"... etc.\"\n\n[ [ 100 ] $: x ] obj $: foo\n\nfoo flat $: flattened\nflattened leaves: [ [ 100 $: x ] ]\nflattened.x leaves: 100\n\"... etc.\"\n\n[ ] $: bar\nbar bar shove\nbar flat leaves: [ [ ] ]\n```\n\n"
+    },
+    "gsub": {
+      "name": "gsub",
+      "desc": "( B P R -- ): global (of all occurences), deep (nesting\n doesn't matter) substitution of Pattern with Replacement\n in Block.\n\nSome important points:\n\n* Self-references are skipped.\n\n* This word goes through the whole block, no matter where the\n  cursor was beforehand, sliding the latter *back to front*\n  (from the end to the beginning), and afterwards restoring its\n  position to that before substitution (taking growth or shrinkage\n  due to substitution into account).\n\n* If Pattern is a block, it is opened with Block as the stack\n  and cursor just after the form-to-check. This word then expects\n  Pattern to leave a truthy/falsey value *for whether the visited\n  form should be replaced* with Replacement.\n\n* The stack effect for Pattern, in case it is a block, must be\n  the following: `( ... F -- ... F true/false )`, where F is the\n  form to check. Otherwise, *stable behavior is yours to ensure*!\n\n* If Pattern is not a block, the following template block is\n  used instead: `[ dup Pattern = ]`.\n\n* Replacement, when this word decides it's time to use it, is\n  opened with Block as the stack and cursor as if it was after\n  the form- to-replace, *but without the latter on the stack*.\n  Insertion is expected. Therefore, the stack effect of Replacement\n  is recommended to be `( -- ... )` where `...` stands for one\n  or more forms. Anything is possible, though, even cursor movement.\n  But in this case remember that *stable behavior is yours to ensure*.\n\n```\n[ `a `b + ] $: temp\n\ntemp #`a 100 gsub\ntemp #`b 200 gsub\ntemp leaves: [ [ 100 200 + ] ]\ntemp open leaves: 300\n```\n\n"
+    },
+    "gsub:": {
+      "name": "gsub:",
+      "desc": "( B P gsub: R -- ): infix version of `gsub`.\n\n```\n[ 100 `cmd\n  200 `cmd ] $: block\n\nblock #`cmd gsub: #echo\nblock leaves: [ [ 100 echo 200 echo ] ]\nblock open \"STDOUT: 100⏎200⏎\"\n```\n\n"
+    },
+    "gsubOn:": {
+      "name": "gsubOn:",
+      "desc": "( B R gsubOn: P -- ): another infix version of `gsub`.\n\n```\n[ 100 `cmdA\n  200 `cmdB ] $: block\n\nblock [ 2 * #echo ] gsubOn: #`cmdA\nblock [ 4 * #echo ] gsubOn: #`cmdB\n\nblock leaves: [ [ 200 echo 800 echo ] ]\nblock open \"STDOUT: 200⏎800⏎\"\n```\n\n"
     },
     "console:width": {
       "name": "console:width",
@@ -979,14 +1043,6 @@
     "leaves:": {
       "name": "leaves:",
       "desc": "( ... leaves: B -- ... ): compares active stack with\n Block: noop if equal via `=`, otherwise, dies. Note that\n only N last items in active stack are compared with Block,\n where N is the amount of items in Block.\n\n```\n100 leaves: [ 100 ] \"Stack has 100 now.\"\n200 leaves: [ 100 200 ] \"Stack has 100 and 200.\"\n300 leaves: [ 300 ] \"Stack has 100 and 200 and 300\"\n```\n\n"
-    },
-    "file": {
-      "name": "file",
-      "desc": "( P -- F ): exchanges a Path block for a File block with\nfile-related vocabulary."
-    },
-    "path": {
-      "name": "path",
-      "desc": "( Pq -- P ): exchanges Path quote for a Path block with\npath-related vocabulary."
     },
     "choose": {
       "name": "choose",
@@ -1382,15 +1438,15 @@
     },
     "dup": {
       "name": "dup",
-      "desc": "( F -- F F ): duplicates the Form before cursor.\n\n```\n'hello' dup leaves: [ 'hello' 'hello' ]\n\n[ 1 2 3 ] (dup 2 |to) $: block\nblock toQuote leaves: '[ 1 2 | 3 ]'\nblock [ dup ] hydrate\nblock toQuote leaves: '[ 1 2 2 | 3 ]'\n```"
+      "desc": "( F -- F F ): duplicates the Form before cursor.\n\n```\n'hello' dup leaves: [ 'hello' 'hello' ]\n\n[ 1 2 | 3 ] $: block\nblock [ dup ] hydrate\nblock leaves: [ [ 1 2 2 | 3 ] ]\n```"
     },
     "drop": {
       "name": "drop",
-      "desc": "( F -- ): drops the Form before cursor.\n\n```\n'hello' drop leaves: [ ]\n\n[ 1 2 3 ] (dup 2 |to) $: block\nblock toQuote leaves: '[ 1 2 | 3 ]'\nblock [ drop ] hydrate\nblock toQuote leaves: '[ 1 | 3 ]'\n```"
+      "desc": "( F -- ): drops the Form before cursor.\n\n```\n'hello' drop leaves: [ ]\n\n[ 1 2 | 3 ] $: block\nblock [ drop ] hydrate\nblock leaves: [ [ 1 | 3 ] ]\n```"
     },
     "swap": {
       "name": "swap",
-      "desc": "( A B -- B A ): swaps two Forms before cursor.\n\n```\n1 2 swap leaves: [ 2 1 ]\n\n[ 1 2 3 ] (dup 2 |to) $: block\nblock toQuote leaves: '[ 1 2 | 3 ]'\nblock [ swap ] hydrate\nblock toQuote leaves: '[ 2 1 | 3 ]'\n```"
+      "desc": "( A B -- B A ): swaps two Forms before cursor.\n\n```\n1 2 swap leaves: [ 2 1 ]\n\n[ 1 2 | 3 ] $: block\nblock [ swap ] hydrate\nblock leaves: [ [ 2 1 | 3 ] ]\n```"
     },
     "hydrate": {
       "name": "hydrate",
@@ -1404,6 +1460,10 @@
       "name": "open",
       "desc": "( F -- F' ): opens Form in the active stack. Equivalent\n to `stack F hydrate`.\n\n```\n100 open leaves: 100\n\n1 [ 2 + ] open leaves: 3\n```"
     },
+    "there": {
+      "name": "there",
+      "desc": "( S B -- S ): opens Block with Stack set as the active\n stack. Leaves Stack. Ahead is transferred to block.\n\n```\n[ 1 2 ] [ + ] there leaves: [ [ 3 ] ]\n[ 1 2 ] [ ahead thruBlock open ] there + leaves: [ [ 3 ] ]\n```"
+    },
     "do": {
       "name": "do",
       "desc": "( F -- ): opens Form with an empty stack activated, and\n disposed when Form has been evaluated.\n\n```\n[ 'Hi!' echo ] do\n\"STDOUT: Hi!⏎\"\n```"
@@ -1411,6 +1471,10 @@
     "new": {
       "name": "new",
       "desc": "( B -- I ): leaves an Instance of a Block."
+    },
+    "shallowNew": {
+      "name": "shallowNew",
+      "desc": "( B -- Si ): leaves a Shallow instance of Block.\n\n`shallowNew` is different from `new` in that it does not force-\nreparent sub-blocks to the parent instance, and so on recursively --\nsometimes such behavior is not desired.\n\nThe difference is very subtle, and you mostly don't need to care.\nAs a word implementor you should, however, choose carefully between\n`new`, `shallowNew`, and `shallowCopy` (and perhaps `toTape` too).\nNovika is all about blocks, and there are different ways to copy,\ninstantiate, and work with them.\n\n```\n[ $: x [ x ] ] @: newBox\n\n1 newBox $: fooBox1\n2 newBox $: fooBox2\n3 newBox $: fooBox3\n\nfooBox1 open leaves: 1\nfooBox2 open leaves: 2\nfooBox3 open leaves: 3\n\n[ fooBox1 fooBox2 fooBox3 ] vals $: boxes\n\nboxes 0 fromLeft open leaves: 1\nboxes 1 fromLeft open leaves: 2\n\"... and so on, as you'd expect. However, let's try to instantiate boxes:\"\n\nboxes new $: boxesInstance\nboxesInstance 0 fromLeft open \"DIES: x is undefined\"\nboxesInstance 1 fromLeft open \"DIES: x is undefined\"\nboxesInstance 2 fromLeft open \"DIES: x is undefined\"\n\n\"Maybe defining 'x' on boxesInstance can shed some light?\"\nboxesInstance extend: [ 'Hello from boxesInstance' $: x ]\nboxesInstance 0 fromLeft open leaves: 'Hello from boxesInstance'\nboxesInstance 1 fromLeft open leaves: 'Hello from boxesInstance'\nboxesInstance 2 fromLeft open leaves: 'Hello from boxesInstance'\n\n\"You've witnessed the so-called *force-reparenting* done by 'new'.\n Let's try using 'shallowNew' for our boxesInstance.\"\n\nboxes shallowNew $: shallowBoxesInstance\nshallowBoxesInstance 0 fromLeft open leaves: 1\nshallowBoxesInstance 1 fromLeft open leaves: 2\nshallowBoxesInstance 2 fromLeft open leaves: 3\n\n\"Works as expected! Note that sub-blocks are exactly the same as\n those in the original 'boxes' block. However, 'shallowBoxesInstance'\n and 'boxes' are different blocks now:\"\n\n(shallowBoxesInstance 0 fromLeft) (boxes 0 fromLeft) same? leaves: true\n(shallowBoxesInstance 1 fromLeft) (boxes 1 fromLeft) same? leaves: true\n(shallowBoxesInstance 2 fromLeft) (boxes 2 fromLeft) same? leaves: true\n\nboxes shallowBoxesInstance same? leaves: false\n\n\"... and 'shallowBoxesInstance' does indeed have 'boxes' as its parent:\"\n\n(shallowBoxesInstance parent) boxes same? leaves: true\n```"
     },
     "sel": {
       "name": "sel",
@@ -1435,6 +1499,10 @@
     "anyof?": {
       "name": "anyof?",
       "desc": "( F B -- true/false ): leaves whether any form in Block is\n equal (via `=`) to Form.\n\n```\n1 [ 1 2 3 ] anyof? leaves: true\n'hello' [ 'hello' 'world' 1 ] anyof? leaves: true\n'hello' [ 1 2 3 ] anyof? leaves: false\n```"
+    },
+    "occurrences": {
+      "name": "occurrences",
+      "desc": "( B/Q Pf/Pq -- Bi ): leaves Begin indices of all occurrences\n of Pattern form/Pattern quote in Block/Quote. Begin indices\n is an orphan with no entries.\n\nWorks in a similar way to `anyof?` in that it compares each\nelement of the Block/Quote with Pattern form/Pattern quote\nlike `=` (but not using `=`, at least in the quote case\nwhere KMP is used).\n\n```\n[ ] 123 occurrences leaves: [ [ ] ]\n\n[ 1 1 2 0 0 1 2 1 3 4 8 ] $: haystack\nhaystack 0 occurrences leaves: [ [ 3 4 ] ]\nhaystack 1 occurrences leaves: [ [ 0 1 5 7 ] ]\nhaystack 'foo' occurrences leaves: [ [ ] ]\n\n'' 'foobar' occurrences leaves: [ [ ] ]\n'foobar' '' occurrences leaves: [ [ ] ]\n\n'foobra' $: haystack\nhaystack 'o' occurrences leaves: [ [ 1 2 ] ]\nhaystack 'foo' occurrences leaves: [ [ 0 ] ]\nhaystack 'ra' occurrences leaves: [ [ 4 ] ]\n\n'GATCCATATG' $: haystack\nhaystack 'ATAAT' occurrences leaves: [ [ ] ]\nhaystack 'ATAT' occurrences leaves: [ [ 5 ] ]\n```"
     },
     "uppercase?": {
       "name": "uppercase?",
@@ -1479,6 +1547,10 @@
     "decimal?": {
       "name": "decimal?",
       "desc": "( F -- true/false ): leaves whether Form is a decimal form,\n or a block that implements '__decimal__'.\n\n```\n123 decimal? leaves: true\n[ 123 $: __decimal__ this ] open decimal? leaves: true\n```"
+    },
+    "toQuotedWord": {
+      "name": "toQuotedWord",
+      "desc": "( Qw/W -- #Qw/#W ): adds a layer of \"quoting\" to Quoted\n word or Word.\n\n```\n\"Note that in quoted word literals (here on the left hand\n side) one layer of quoting is 'eaten off' by the parser!\"\n\n#foo toQuotedWord leaves: #foo\n##foo toQuotedWord leaves: ##foo\n```"
     },
     "asDecimal": {
       "name": "asDecimal",
@@ -1548,6 +1620,10 @@
       "name": "entry:fetch?",
       "desc": "( Rs N -- F true / false ): leaves the value Form with the\n given Name in Readable store (usually a block) if an entry\n for Name exists there, and/or a boolean indicating the\n latter: `true` (exists), or `false` (does not exist).\n\n```\n[ ] $: a\na #x 100 pushes\n\na #x entry:fetch? leaves: [ 100 true ]\na #y entry:fetch? leaves: [ false ]\n```"
     },
+    "entry:open": {
+      "name": "entry:open",
+      "desc": "( Rs C N -- ... ): resolves Name in Readable store and *opens*\n it if it is an opener, assuming Caller to be the opener block."
+    },
     "entry:flatFetch?": {
       "name": "entry:flatFetch?",
       "desc": "( B N -- F true / false ): leaves the value Form under\n Name in Block's dictionary followed by `true`, or `false`\n if no such entry is in Block. Block hierarchy is not\n traversed (only the Block's own dictionary is looked at)."
@@ -1555,6 +1631,14 @@
     "entry:isOpenEntry?": {
       "name": "entry:isOpenEntry?",
       "desc": "( Rs N -- true/false ): leaves whether an entry with the\n given Name in Readable store (usually a block) is an\n open entry. Dies if Readable store has no entry with\n the given Name."
+    },
+    "entry:delete": {
+      "name": "entry:delete",
+      "desc": "( B N -- ): deletes the entry corresponding to Name form\n from the dictionary of Block if it exists there. Otherwise,\n does nothing.\n\n```\n100 $: x\n\n[ 200 $: x ] obj $: foo\n\n\"'x' of foo shadows 'x' of toplevel block\"\nfoo.x leaves: 200\n\n\"Let's try to remove it so it doesn't:\"\nfoo #x entry:delete\nfoo.x leaves: 100\n```"
+    },
+    "entry:pathTo?": {
+      "name": "entry:pathTo?",
+      "desc": "( B N -- P F true / false ): leaves Path, a block describing the\n path to Form (including Block itself) under the corresponding\n Name (like `entry:fetch?`). Follows Path and Form with `true`\n indicating success, otherwise *only* `false` indicating that\n there is no Form corresponding to Name in Block or any of the\n blocks reachable from Block.\n\nThis word exists mainly for testing word lookup sanity. Feel free\nto use it if you find any reason to!\n\n```\n[ 100 $: x  'a' $: __quote__ ] obj $: a\n[ 200 $: y  'b' $: __quote__ ] obj $: b\n[ 300 $: z  'c' $: __quote__ ] obj $: c\n\na -- b -- c drop\n\n[ a #x entry:pathTo? ] vals sepBy: ' ' leaves: '[ a ] 100 true'\n[ b #x entry:pathTo? ] vals sepBy: ' ' leaves: '[ b a ] 100 true'\n[ c #x entry:pathTo? ] vals sepBy: ' ' leaves: '[ c b a ] 100 true'\n\n[ b #y entry:pathTo? ] vals sepBy: ' ' leaves: '[ b ] 200 true'\n[ c #y entry:pathTo? ] vals sepBy: ' ' leaves: '[ c b ] 200 true'\n\n[ c #z entry:pathTo? ] vals sepBy: ' ' leaves: '[ c ] 300 true'\n\n[ c #foo entry:pathTo? ] vals sepBy: ' ' leaves: 'false'\n```"
     },
     "shallowCopy": {
       "name": "shallowCopy",
@@ -1652,6 +1736,14 @@
       "name": "ord",
       "desc": "( Q -- Uc ): leaves the Unicode codepoint for the first\n character in Quote. Dies if Quote is empty."
     },
+    "rpad": {
+      "name": "rpad",
+      "desc": "( Q Tl Pq -- Jq ): appends consecutive characters in Padding quote\n to the right of Quote (the last one is repeated if no more follow),\n until Quote count becomes equal to Total length. Leaves the resulting\n Justified quote.\n\n```\n'hello' 10 '-' rpad leaves: 'hello-----'\n'hello' 10 ' -' rpad leaves: 'hello ----'\n'hello' 7 'foobar' rpad leaves: 'hellofo'\n```"
+    },
+    "fit": {
+      "name": "fit",
+      "desc": "( Q Tl Eq -- Fq ): if Quote is longer than Total length, truncates\n it so that it can fit Ellipsis quote, and stitches the truncated\n Quote with the Ellipsis quote, forming Fit quote which is then\n left on the stack.\n\nEssentially, Fit quote is guaranteed to be of Total length\ncharacters **or less!**.\n\n```\n'hello' 10 '…' fit leaves: 'hello'\n'hello world' 10 '…' fit leaves: 'hello wor…'\n'hello world' 8 '' fit leaves: 'hello wo'\n'Lorem ipsum dolor sit amet' 10 '-' fit leaves: 'Lorem ipsu-'\n'Lorem ipsum dolor sit amet' 24 '… (hidden)' fit leaves: 'Lorem ipsum do… (hidden)'\n```"
+    },
     "|at": {
       "name": "|at",
       "desc": "( B -- N ): leaves N, the position of the cursor in Block."
@@ -1682,7 +1774,7 @@
     },
     "shove*": {
       "name": "shove*",
-      "desc": "( [ ...bl | ...br ]B [ ...el | ...er ]Eb ~> [ ...bl ...el | ...br ]B -- ): adds\n elements before cursor in Element block after the cursor in Block.\n\n```\n[ 1 2 3 ] $: xs\nxs [ 4 5 6 ] shove*\nxs leaves: [ [ 1 2 3 4 5 6 \"|\" ] ]\n\n[ 1 2 3 ] $: ys\nys 1 |to \"[ 1 | 2 3 ]\"\nys [ 100 200 300 ] shove* \"[ 1 100 200 300 | 2 3 ]\"\nys dup count |to\nys leaves: [ [ 1 100 200 300 2 3 ] ]\n```"
+      "desc": "( [ ...bl | ...br ]B [ ...el | ...er ]Eb ~> [ ...bl ...el | ...br ]B -- ): adds\n elements before cursor in Element block after the cursor in Block.\n\n```\n[ 1 2 3 ] $: xs\nxs [ 4 5 6 ] shove*\nxs leaves: [ [ 1 2 3 4 5 6 \"|\" ] ]\n\n[ 1 | 2 3 ] $: ys\nys [ 100 200 300 ] shove*\nys leaves: [ 1 100 200 300 | 2 3 ]\n```"
     },
     "eject": {
       "name": "eject",
@@ -1710,7 +1802,7 @@
     },
     "sortUsing!": {
       "name": "sortUsing!",
-      "desc": "( B Cb -- B ): leaves Block sorted inplace. Forms in Block\n are compared using Comparator block.\n\nComparator block is opened with two forms on the stack; let's\ncall them A and B. If Comparator block leaves a negative decimal\n(conventionally `-1`), then `A < B`. If Comparator block leaves\n`0`, then `A = B`. If Comparator block leaves a positive decimal\n(conventionally `1`), then `A > B`.\n\nDies if Comparator block leaves any other (kind of) form.\n\nIgnores all forms but the topmost for Comparator block.\n\n\n```\n[ 3 2 1 ] [ - ] sortUsing leaves: [ 1 2 3 ]\n```"
+      "desc": "( B Cb -- B ): leaves Block sorted inplace. Forms in Block\n are compared using Comparator block.\n\nComparator block is opened with two forms on the stack; let's\ncall them A and B. If Comparator block leaves a negative decimal\n(conventionally `-1`), then `A < B`. If Comparator block leaves\n`0`, then `A = B`. If Comparator block leaves a positive decimal\n(conventionally `1`), then `A > B`.\n\nDies if Comparator block leaves any other (kind of) form.\n\nIgnores all forms but the topmost for Comparator block.\n\n\n```\n[ 3 2 1 ] [ - ] sortUsing! leaves: [ 1 2 3 ]\n```"
     },
     "getErrorDetails": {
       "name": "getErrorDetails",
@@ -1746,11 +1838,11 @@
     },
     "reparent": {
       "name": "reparent",
-      "desc": "( C P -- C ): changes the parent of Child to Parent. Checks\n for cycles which can hang the interpreter, therefore is\n O(N) where N is the amount of Parent's ancestors."
+      "desc": "( C P -- C ): changes the parent of Child to Parent. Lookup\n cycles are allowed and handled gracefully."
     },
     "befriend": {
       "name": "befriend",
-      "desc": "( B F -- ): adds Friend to Block's friend list.\n\nFriends are asked for word entries after parents, grandparents\netc. have failed to retrieve them. This recurses, e.g. friends\nask their own friends and so on, until the entry is found.\n\n```\n[ 100 $: x this ] open $: a\n[ 200 $: y this ] open $: b\na b befriend\nb a befriend\na.x echo\n\"STDOUT: 100⏎\"\n\na.y echo\n\"STDOUT: 200⏎\"\n\nb.x echo\n\"STDOUT: 100⏎\"\n\nb.y echo\n\"STDOUT: 200⏎\"\n\na #x [ 'I've changed!' echo ] opens\n\na.x\n\"STDOUT: I've changed!⏎\"\nb.x\n\"STDOUT: I've changed!⏎\"\n```"
+      "desc": "( B F -- ): adds Friend to Block's friend list.\n\nFriends are asked for word entries after parents, grandparents\netc. have failed to retrieve them. This recurses, e.g. friends\nask their own friends and so on, until the entry is found. Lookup\ncycles are allowed and handled gracefully.\n\n```\n[ 100 $: x this ] open $: a\n[ 200 $: y this ] open $: b\na b befriend\nb a befriend\na.x echo\n\"STDOUT: 100⏎\"\n\na.y echo\n\"STDOUT: 200⏎\"\n\nb.x echo\n\"STDOUT: 100⏎\"\n\nb.y echo\n\"STDOUT: 200⏎\"\n\na #x [ 'I've changed!' echo ] opens\n\na.x\n\"STDOUT: I've changed!⏎\"\nb.x\n\"STDOUT: I've changed!⏎\"\n```"
     },
     "unfriend": {
       "name": "unfriend",
