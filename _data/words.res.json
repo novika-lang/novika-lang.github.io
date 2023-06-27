@@ -332,6 +332,14 @@
       "name": "bi@:",
       "desc": "( X Y bi@: B -- Bx By ): infix version of `bi@`."
     },
+    "<<|": {
+      "name": "<<|",
+      "desc": "( -- ): moves cursor left twice in the active stack,\n opposite of `|>>`. Same as `<| <|` but looks nicer.\n\n```\n[ a b c | ] |: [ <<| 123 |>> 456 ] leaves: [ [ a 123 b c 456 ] ]\n```\n\n"
+    },
+    "|>>": {
+      "name": "|>>",
+      "desc": "( -- ): moves cursor right twice in the active stack,\n opposite of `<<|`. Same as `|> |>` but looks nicer.\n\nSee `<<|` for an example of how you can use this word.\n\n"
+    },
     "easeInSine": {
       "name": "easeInSine",
       "desc": "( X -- Xe ): eases X using easeInSine function."
@@ -468,17 +476,25 @@
       "name": "parseDecimal",
       "desc": "( Q -- D ): converts Quote to Decimal. Dies if Quote does\n not contain a decimal, or if couldn't parse it out.\n\nQuote is parsed by Novika. This word only ensures the result\nof that is a decimal. Aside from error messages that leak\nthis fact, you generally shouldn't care about this.\n\n```\n'1234' parseDecimal leaves: 1234\n'-1234.5678' parseDecimal leaves: -1234.5678\n```\n\n"
     },
+    "top?": {
+      "name": "top?",
+      "desc": "( B -- Tf true / false ): leaves Top form in Block followed\n by `true` if there is one, otherwise leaves `false` only.\n\nTop form is the form before the cursor in Block.\n\n```\n[ ] top? leaves: false\n[ 1 2 3 | ] top? leaves: [ 3 true ]\n[ 1 2 | 3 ] top? leaves: [ 2 true ]\n[ 1 | 2 3 ] top? leaves: [ 1 true ]\n[ | 1 2 3 ] top? leaves: false\n```\n\n"
+    },
     "peek?": {
       "name": "peek?",
       "desc": "( [ ... | F ... ]B -- F true / false ): leaves Form and/\n or a boolean for whether Form exists in Block.\n\n```\n[ 1 | 2 3 ] peek? leaves: [ 2 true ]\n[ 1 2 3 | ] peek? leaves: false\n```\n\n"
     },
+    "|atLeftBound?": {
+      "name": "|atLeftBound?",
+      "desc": "( B -- true/false ): leaves whether cursor is at the\n left end in Block.\n\n```\n[ | ] |atLeftBound? leaves: true\n[ 1 | ] |atLeftBound? leaves: false\n[ | 1 2 3 ] |atLeftBound? leaves: true\n[ 1 | 2 3 ] |atLeftBound? leaves: false\n[ 1 2 3 | ] |atLeftBound? leaves: false\n```\n\n"
+    },
+    "|atRightBound?": {
+      "name": "|atRightBound?",
+      "desc": "( B -- true/false ): leaves whether cursor is at the\n right end in Block.\n\n```\n[ | ] |atRightBound? leaves: true\n[ 1 | ] |atRightBound? leaves: true\n[ | 1 2 3 ] |atRightBound? leaves: false\n[ 1 | 2 3 ] |atRightBound? leaves: false\n[ 1 2 3 | ] |atRightBound? leaves: true\n```\n\n"
+    },
     "|afterFirst?": {
       "name": "|afterFirst?",
       "desc": "( B -- true/false ): leaves whether cursor is after the\n first form in Block.\n\n```\n[ | ] |afterFirst? leaves: false\n[ 1 | ] |afterFirst? leaves: true\n[ 1 | 2 3 ] |afterFirst? leaves: true\n[ 1 2 3 | ] |afterFirst? leaves: false\n```\n\n"
-    },
-    "|afterLast?": {
-      "name": "|afterLast?",
-      "desc": "( B -- true/false ): leaves whether cursor is after the\n last form in Block.\n\n```\n[ | ] |afterLast? leaves: true\n[ 1 | ] |afterLast? leaves: true\n[ | 1 2 3 ] |afterLast? leaves: false\n[ 1 | 2 3 ] |afterLast? leaves: false\n[ 1 2 3 | ] |afterLast? leaves: true\n```\n\n"
     },
     "|-": {
       "name": "|-",
@@ -852,10 +868,6 @@
       "name": "concat",
       "desc": "( B1 B2 -- Br ): concatenates two Blocks.\n\n```\n[ 1 2 3 ] [ 4 5 6 ] concat\n  leaves: [ [ 1 2 3 4 5 6 ] \"(a new block!)\" ]\n```\n\n"
     },
-    "ls*": {
-      "name": "ls*",
-      "desc": "( -- Wl ): leaves Word list block that contains words\n defined (*resolvable*) in caller and in its relatives.\n\n```\n0 $: y [ 1 $: x ls* ] open leaves: [ [ \"...\" y x ] ]\n```\n\nAs opposed to `ls`, which leaves only block's own words:\n\n```\n0 $: y [ 1 $: x this ls ] open leaves: [ [ x ] ]\n```\n\n"
-    },
     "hasDesc?": {
       "name": "hasDesc?",
       "desc": "( B -- true/false ): leaves whether Block has a description."
@@ -1048,6 +1060,10 @@
       "name": "choose",
       "desc": "( F Cl -- Cb' ): high-level conditional. Acts similar to `case`\n or `switch` in other languages. Takes a Form to match over, and\n a Case list in the form `[ Condition Case-Body Condition Case-Body ... ]`.\n Leaves the result of Case body corresponding to the condition that\n matched Form, otherwise (if no cases matched), Form itself.\n\n```novika\n1 to: 100 each: [\n  [ [ 15 /? ] 'FizzBuzz'\n    [  5 /? ] 'Buzz'\n    [  3 /? ] 'Fizz'\n  ] choose echo\n]\n```\n\n"
     },
+    "_": {
+      "name": "_",
+      "desc": "( A B -- B A ): same as `swap`, but is more readable and\n compact in certain scenarios.\n\n```\n[ 'Judy' 'Mark' 'Fabian' 'Huggee' ] $: pets\n\norphan $: ages\n\npets each: [\n  ages _ (0 randTo: 15) pushes\n]\n\n\"Your numbers will probably be different because we're\n generating them randomly:\"\nages -> 'Judy' leaves: 1\nages -> 'Mark' leaves: 8\nages -> 'Fabian' leaves: 11\nages -> 'Huggee' leaves: 14\n```\n\n"
+    },
     "${": {
       "name": "${",
       "desc": "( E... -- ): same as `$:` but allows to define multiple pusher\n Entries simultaneously, and in the 'human-readable' order.\n\n```\n[ ${ x y } this ] @: point\n\n100 200 point -> [ x y ]\n  leaves: [ [ 100 200 ] ]\n```\n\n"
@@ -1059,6 +1075,10 @@
     "={": {
       "name": "={",
       "desc": "( E... -- ): same as `=:`, but allows to submit multiple Entries\n simultaneously, and in the 'human-readable' order.\n\n```\n[ @{ x y }\n\n  [ ={ x y } ] @: update\n\n  this\n] @: point\n\n0 0 point $: A\n\nA.x A.y leaves: [ 0 0 ]\n\n100 200 A.update\n\nA.x A.y leaves: [ 100 200 ]\n```\n\n"
+    },
+    "newBlockSet": {
+      "name": "newBlockSet",
+      "desc": "( -- ::set:: ): a set-like data structure for storing blocks\n (and only blocks) by their address, or some other property based\n on the key (mapper) block, see `::set::/keyBy` .\n\nEntry order (and iteration order) is exactly the insertion order.\n\nExposes the following words: `add[:]`, `remove[:]`, `has?`\nand `has:`, `each[:]`, `keyBy[:]`.\n\n```\nnewBlockSet $: set\n\n[ 1 2 ] $: foo\n[ 3 4 ] $: bar\n[ 1 2 ] $: baz\n\nset.add: foo\nset.add: bar\n\nset.has: foo leaves: true\nset.has: bar leaves: true\nset.has: baz leaves: false\n\nset.remove: bar\nset.has: bar leaves: false\n\nset.add: baz\nset.has: baz leaves: true\n\nset.each: [ echo ]\n\"STDOUT: [ 1 2 ]⏎[ 1 2 ]⏎\"\n\n\"The first printed block is `foo` and the second is `baz`.\n Despite looking the same, they are different blocks stored\n at different addresses!\"\n```\n\n"
     },
     "sdl:keysym": {
       "name": "sdl:keysym",
@@ -1215,6 +1235,22 @@
     "sdl:destroyTexture": {
       "name": "sdl:destroyTexture",
       "desc": "[foreign function: SDL_DestroyTexture]"
+    },
+    "sdl:destroyWindow": {
+      "name": "sdl:destroyWindow",
+      "desc": "[foreign function: SDL_DestroyWindow]"
+    },
+    "sdl:window:setTitle": {
+      "name": "sdl:window:setTitle",
+      "desc": "[foreign function: SDL_SetWindowTitle]"
+    },
+    "sdl:window:setSize": {
+      "name": "sdl:window:setSize",
+      "desc": "[foreign function: SDL_SetWindowSize]"
+    },
+    "sdl:destroyRenderer": {
+      "name": "sdl:destroyRenderer",
+      "desc": "[foreign function: SDL_DestroyRenderer]"
     },
     "sdl:renderCopy": {
       "name": "sdl:renderCopy",
@@ -1628,17 +1664,41 @@
       "name": "entry:flatFetch?",
       "desc": "( B N -- F true / false ): leaves the value Form under\n Name in Block's dictionary followed by `true`, or `false`\n if no such entry is in Block. Block hierarchy is not\n traversed (only the Block's own dictionary is looked at)."
     },
-    "entry:isOpenEntry?": {
-      "name": "entry:isOpenEntry?",
-      "desc": "( Rs N -- true/false ): leaves whether an entry with the\n given Name in Readable store (usually a block) is an\n open entry. Dies if Readable store has no entry with\n the given Name."
+    "entry:opener?": {
+      "name": "entry:opener?",
+      "desc": "( Rs N -- true/false ): leaves whether an entry with the\n given Name in Readable store (usually a block) is an\n opener entry. Dies if Readable store has no entry with\n the given Name."
     },
     "entry:delete": {
       "name": "entry:delete",
-      "desc": "( B N -- ): deletes the entry corresponding to Name form\n from the dictionary of Block if it exists there. Otherwise,\n does nothing.\n\n```\n100 $: x\n\n[ 200 $: x ] obj $: foo\n\n\"'x' of foo shadows 'x' of toplevel block\"\nfoo.x leaves: 200\n\n\"Let's try to remove it so it doesn't:\"\nfoo #x entry:delete\nfoo.x leaves: 100\n```"
+      "desc": "( B N -- ): removes the entry corresponding to Name form\n from the dictionary of Block if it exists there. Otherwise,\n does nothing.\n\n```\n100 $: x\n\n[ 200 $: x ] obj $: foo\n\n\"'x' of foo shadows 'x' of toplevel block\"\nfoo.x leaves: 200\n\n\"Let's try to remove it so it doesn't:\"\nfoo #x entry:delete\nfoo.x leaves: 100\n```"
+    },
+    "entry:wipeout": {
+      "name": "entry:wipeout",
+      "desc": "( B -- ): removes all *owned* dictionary entries in Block.\n\n```\n[ 100 $: x\n  200 $: y\n] obj $: numbers\n\nnumbers entry:names leaves: [ [x y] ]\n\nnumbers entry:wipeout\nnumbers entry:names leaves: [ [] ]\n```"
     },
     "entry:pathTo?": {
       "name": "entry:pathTo?",
       "desc": "( B N -- P F true / false ): leaves Path, a block describing the\n path to Form (including Block itself) under the corresponding\n Name (like `entry:fetch?`). Follows Path and Form with `true`\n indicating success, otherwise *only* `false` indicating that\n there is no Form corresponding to Name in Block or any of the\n blocks reachable from Block.\n\nThis word exists mainly for testing word lookup sanity. Feel free\nto use it if you find any reason to!\n\n```\n[ 100 $: x  'a' $: __quote__ ] obj $: a\n[ 200 $: y  'b' $: __quote__ ] obj $: b\n[ 300 $: z  'c' $: __quote__ ] obj $: c\n\na -- b -- c drop\n\n[ a #x entry:pathTo? ] vals sepBy: ' ' leaves: '[ a ] 100 true'\n[ b #x entry:pathTo? ] vals sepBy: ' ' leaves: '[ b a ] 100 true'\n[ c #x entry:pathTo? ] vals sepBy: ' ' leaves: '[ c b a ] 100 true'\n\n[ b #y entry:pathTo? ] vals sepBy: ' ' leaves: '[ b ] 200 true'\n[ c #y entry:pathTo? ] vals sepBy: ' ' leaves: '[ c b ] 200 true'\n\n[ c #z entry:pathTo? ] vals sepBy: ' ' leaves: '[ c ] 300 true'\n\n[ c #foo entry:pathTo? ] vals sepBy: ' ' leaves: 'false'\n```"
+    },
+    "entry:names": {
+      "name": "entry:names",
+      "desc": "( B -- Nb ): gathers all *owned* dictionary entry names of Block\n into Name block.\n\n```\n[ 100 200 ${ x y } ] obj $: myParent\n[ 300 $: z ] obj $: myChild\n[ 'Hello World' $: greeting ] obj $: myFriend\n\nmyParent -- myChild drop\nmyParent ·> myFriend drop\nmyChild ·> myFriend drop \"for good measure :)\"\n\nmyParent entry:names leaves: [ [y x] ]\nmyChild entry:names leaves: [ [z] ]\nmyFriend entry:names leaves: [ [greeting] ]\n```"
+    },
+    "entry:names*": {
+      "name": "entry:names*",
+      "desc": "( B -- Nb ): gathers all dictionary entry names *reachable* from\n Block to Name block. That is, gathers all entry names in Block,\n Block's parents, Block's friends, and so on. Explores the entire\n relative graph of Block.\n\nOrder is not guaranteed, and mainly depends on the appearance of\nBlock's relative graph.\n\n```\n[ 100 200 ${ x y } ] obj toOrphan $: myParent\n[ 300 $: z ] obj toOrphan $: myChild\n[ 'Hello World' $: greeting ] obj toOrphan $: myFriend\n\nmyParent -- myChild drop\nmyParent ·> myFriend drop\nmyChild ·> myFriend drop\n\nmyParent entry:names* leaves: [ [y x greeting] ]\nmyChild entry:names* leaves: [ [z y x greeting] ]\nmyFriend entry:names* leaves: [ [greeting] ]\n```"
+    },
+    "entry:values": {
+      "name": "entry:values",
+      "desc": "( B -- Vb ): gathers all *owned* dictionary entry value forms of\n Block into Value block.\n\n```\n[ 100 200 ${ x y } ] obj $: myParent\n[ 300 $: z ] obj $: myChild\n[ 'Hello World' $: greeting ] obj $: myFriend\n\nmyParent -- myChild drop\nmyParent ·> myFriend drop\nmyChild ·> myFriend drop\n\nmyParent entry:values leaves: [ [200 100] ]\nmyChild entry:values leaves: [ [300] ]\nmyFriend entry:values leaves: [ ['Hello World'] ]\n```"
+    },
+    "entry:values*": {
+      "name": "entry:values*",
+      "desc": "( B -- Nb ): gathers all dictionary entry values *reachable* from\n Block to Name block. That is, gathers all entry values in Block,\n Block's parents, Block's friends, and so on. Explores the entire\n relative graph of Block.\n\nOrder is not guaranteed, and mainly depends on the appearance\nof Block's relative graph. Values may repeat if some blocks\nin this graph define entries with the same name.\n\n```\n[ 100 200 ${ x y } ] obj toOrphan $: myParent\n[ 300 $: z ] obj toOrphan $: myChild\n[ 'Hello World' $: greeting ] obj toOrphan $: myFriend\n\nmyParent -- myChild drop\nmyParent ·> myFriend drop\nmyChild ·> myFriend drop\n\nmyParent entry:values* leaves: [ [200 100 'Hello World'] ]\nmyChild entry:values* leaves: [ [300 200 100 'Hello World'] ]\nmyFriend entry:values* leaves: [ ['Hello World'] ]\n```"
+    },
+    "entry:count": {
+      "name": "entry:count",
+      "desc": "( B -- Ec ): leaves Entry count, that is, the amount of entries\n owned by (defined in) Block.\n\n```\n[ 100 200 ${ x y } ] obj $: myBlock\n\nmyBlock entry:count leaves: 2 \"'x' and 'y'\"\n```"
     },
     "shallowCopy": {
       "name": "shallowCopy",
@@ -1736,9 +1796,13 @@
       "name": "ord",
       "desc": "( Q -- Uc ): leaves the Unicode codepoint for the first\n character in Quote. Dies if Quote is empty."
     },
+    "lpad": {
+      "name": "lpad",
+      "desc": "( Q Tl Pq -- Jq ): appends consecutive characters from Padding quote\n (the last one is repeated if no more follow) to the left of Quote,\n until Quote count becomes equal to Total length. Leaves the resulting\n Justified quote.\n\n```\n'hello' 10 '-' lpad leaves: '-----hello'\n'hello' 10 ':-' lpad leaves: ':----hello'\n'hello' 7 'XYZABC' lpad leaves: 'XYhello'\n'hello' 9 'XYZABC' lpad leaves: 'XYZAhello'\n```"
+    },
     "rpad": {
       "name": "rpad",
-      "desc": "( Q Tl Pq -- Jq ): appends consecutive characters in Padding quote\n to the right of Quote (the last one is repeated if no more follow),\n until Quote count becomes equal to Total length. Leaves the resulting\n Justified quote.\n\n```\n'hello' 10 '-' rpad leaves: 'hello-----'\n'hello' 10 ' -' rpad leaves: 'hello ----'\n'hello' 7 'foobar' rpad leaves: 'hellofo'\n```"
+      "desc": "( Q Tl Pq -- Jq ): appends consecutive characters from Padding quote\n (the last one is repeated if no more follow) to the right of Quote,\n until Quote count becomes equal to Total length. Leaves the resulting\n Justified quote.\n\n```\n'hello' 10 '-' rpad leaves: 'hello-----'\n'hello' 10 ' -' rpad leaves: 'hello ----'\n'hello' 7 'foobar' rpad leaves: 'hellofo'\n```"
     },
     "fit": {
       "name": "fit",
@@ -1831,10 +1895,6 @@
     "stitch": {
       "name": "stitch",
       "desc": "( Q1 Q2 -- Q3 ): quote concatenation."
-    },
-    "ls": {
-      "name": "ls",
-      "desc": "( B -- Nb ): gathers all dictionary entry names into\n Name block."
     },
     "reparent": {
       "name": "reparent",
