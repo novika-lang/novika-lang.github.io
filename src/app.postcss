@@ -1,0 +1,73 @@
+/* Write your global styles here, in PostCSS syntax */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+::-webkit-scrollbar {
+  @apply w-1 h-1;
+}
+
+::-webkit-scrollbar-track {
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-zinc-600 rounded-lg hover:bg-blue-300;
+}
+
+::-webkit-scrollbar-corner {
+  @apply hidden;
+}
+
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 1280px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.token.decimal {
+  @apply text-indigo-300;
+}
+
+.token.quote {
+  @apply text-yellow-300;
+}
+
+.token.comment {
+  @apply text-zinc-500;
+}
+
+.token.qword {
+  @apply text-orange-300;
+}
+
+.token.word {
+  @apply text-zinc-200;
+}
+
+.token.word.control {
+  @apply text-indigo-300;
+}
+
+.token.word.control {
+  @apply text-violet-400;
+}
+
+.token.word.stackworks {
+  @apply text-blue-300;
+}
+
+.token.word.this {
+  @apply text-rose-400;
+}
+
+.token.boolean {
+  @apply text-green-300;
+}
+
+.token.leaves {
+  @apply text-zinc-100 font-semibold;
+}
